@@ -15,7 +15,7 @@ cluster, and a baked image can't.
 | MCP server | `mcp-server-dynatrace` in the sandbox (managed build, pinned `1.0.1`) |
 | Dynatrace | Managed (your cluster host) |
 | Cluster URL / env id | you set them (`DT_ENVIRONMENT_CONFIGS`) |
-| Credential | API token via `sbx secret set -g dynatrace` |
+| Credential | API token via `sbx secret set-custom` |
 
 ## 1. Create an API token
 
@@ -26,20 +26,24 @@ Generate token*, with the read scopes you need — `problems.read`,
 
 ## 2. Store the token
 
+Key it on your cluster host (the same host you set in the spec below), so the
+proxy injects it on requests to that cluster:
+
 ```bash
-echo "$DT_TOKEN" | sbx secret set -g dynatrace
+sbx secret set-custom --host 'managed.example.com' --env DT_API_TOKEN --value "$DT_TOKEN"
 ```
 
 ## 3. Point the kit at your cluster
 
 Edit `kits/managed/spec.yaml` and replace `managed.example.com` with your
-cluster host in all three places:
+cluster host in all three places (use the **same** host in the `set-custom`
+command above):
 
 - `network.allowedDomains` (so the sandbox may reach it)
 - `network.serviceDomains` (so the proxy attaches the token to it)
 - `DT_ENVIRONMENT_CONFIGS` — set `apiEndpointUrl`, `dynatraceUrl`,
-  `environmentId`, and `alias`; keep `apiToken` as `"proxy-managed"` (the
-  sentinel the proxy replaces). Update the same JSON in the `mcp.json` initFile.
+  `environmentId`, and `alias`; leave `apiToken` as `"inject-me"` (the
+  placeholder the proxy replaces). Update the same JSON in the `mcp.json` initFile.
 
 The Managed API base is typically `https://<cluster-host>/e/` with the
 environment id appended.
@@ -47,7 +51,7 @@ environment id appended.
 ## Run
 
 ```bash
-echo "$DT_TOKEN" | sbx secret set -g dynatrace
+sbx secret set-custom --host 'managed.example.com' --env DT_API_TOKEN --value "$DT_TOKEN"
 sbx run --kit ./kits/managed claude      # edit the spec first
 ```
 
@@ -60,6 +64,6 @@ sbx run --kit ./kits/managed claude      # edit the spec first
 ```
 
 Expect the cluster's open problems. If it can't connect, confirm your cluster
-host is in `allowedDomains`, the token is stored (`sbx secret ls` shows a
-`dynatrace` entry), and `DT_ENVIRONMENT_CONFIGS` has your real
+host is in `allowedDomains`, the token is stored and keyed on that same host
+(`sbx secret ls`), and `DT_ENVIRONMENT_CONFIGS` has your real
 `apiEndpointUrl` / `environmentId`.

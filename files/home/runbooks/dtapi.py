@@ -4,9 +4,10 @@
 Ships with the sbx-kits-dynatrace kit (remote / local targets). It reads
 DT_ENVIRONMENT and DT_PLATFORM_TOKEN from the environment the kit sets up and
 executes DQL against the Grail query API. The platform token in the sandbox is a
-proxy-managed sentinel; the sbx proxy swaps in the real token on the wire, so
-this module just sends it as `Authorization: Bearer <sentinel>` and lets the
-proxy do the rest.
+placeholder (set by `sbx secret set-custom --env DT_PLATFORM_TOKEN`); the sbx
+proxy overwrites the Authorization header with the real token on the wire, so
+this module just sends `Authorization: Bearer <placeholder>` and lets the proxy
+do the rest.
 
 Not meant to be run directly — imported by run_dql.py and dynatrace_report.py.
 """
@@ -18,9 +19,9 @@ import requests
 
 # Base URL of your Dynatrace SaaS platform, e.g. https://abc12345.apps.dynatrace.com
 ENVIRONMENT = os.environ.get("DT_ENVIRONMENT", "").rstrip("/")
-# In the sandbox this is the "proxy-managed" sentinel; the sbx proxy rewrites the
+# In the sandbox this is a placeholder; the sbx proxy overwrites the
 # Authorization header on the wire. Passed through verbatim as the bearer value.
-TOKEN = os.environ.get("DT_PLATFORM_TOKEN", "proxy-managed")
+TOKEN = os.environ.get("DT_PLATFORM_TOKEN", "inject-me")
 
 QUERY_EXECUTE = "/platform/storage/query/v1/query:execute"
 QUERY_POLL = "/platform/storage/query/v1/query:poll"
@@ -104,8 +105,8 @@ def _raise_for_status(resp):
         hint = ""
         if resp.status_code in (401, 403):
             hint = (
-                " — check that a token is stored (`sbx secret ls` shows a "
-                "`dynatrace` entry) and that it carries the storage:*:read scopes."
+                " - check that the secret is stored (`sbx secret ls`) and that "
+                "the token carries the storage:*:read scopes."
             )
         raise DynatraceError(
             f"{resp.request.method} {resp.url} -> {resp.status_code}: "

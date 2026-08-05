@@ -48,7 +48,8 @@ if __name__ == "__main__":
         print(f"Could not reach Dynatrace: {exc}", file=sys.stderr)
         print(
             "Check that DT_ENVIRONMENT points at your https://<env>.apps.dynatrace.com "
-            "URL and that a token is stored with `sbx secret set -g dynatrace`.",
+            "URL and that a token is stored with `sbx secret set-custom "
+            "--host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN`.",
             file=sys.stderr,
         )
         sys.exit(1)

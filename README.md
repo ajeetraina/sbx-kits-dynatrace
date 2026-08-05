@@ -52,12 +52,20 @@ recommended read-only scope set.
 
 ### 2. Store the token with sbx (never on the command line)
 
-The token is never baked into the kit; the sbx proxy injects it at runtime. The
-stored secret is named `dynatrace` (matching `credentials.sources.dynatrace`):
+The token is never baked into the kit; you store it once on the host with
+`sbx secret set-custom` (custom because Dynatrace is not a built-in sbx service),
+keyed on the Dynatrace host and an env var. The sbx proxy then swaps the
+placeholder for the real token on outbound requests, so it never enters the
+sandbox. Secrets are global by default:
 
 ```console
-echo "$DT_TOKEN" | sbx secret set -g dynatrace   # -g = all sandboxes
-sbx secret ls                                     # confirm a `dynatrace` entry
+# SaaS (remote / local) - platform token, keyed on the apps host
+sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
+
+# Managed - API token, keyed on your cluster host (matches kits/managed/spec.yaml)
+sbx secret set-custom --host 'managed.example.com' --env DT_API_TOKEN --value "$DT_TOKEN"
+
+sbx secret ls   # confirm the secret is stored
 ```
 
 ### 3. Launch the sandbox with the kit
@@ -131,8 +139,9 @@ on PATH: `!command -v mcp-server-dynatrace`.
 !env | grep -E 'DT_ENVIRONMENT|DT_PLATFORM_TOKEN'
 ```
 
-`DT_PLATFORM_TOKEN` reads `proxy-managed` - that's the sentinel; the real token
-lives only on the host and is injected on the wire.
+`DT_PLATFORM_TOKEN` holds a placeholder (set by `sbx secret set-custom --env
+DT_PLATFORM_TOKEN`); the real token lives only on the host and is injected on
+the wire.
 
 **4c. The portable MCP definition the kit wrote exists:**
 
@@ -199,9 +208,10 @@ the sbx runtime refuses to mount your home directory into the sandbox. Run
 apps URL - `export DT_ENVIRONMENT=https://<env>.apps.dynatrace.com` (not the
 classic `*.live.dynatrace.com`), or edit the spec in a clone.
 
-**`401`/`403` from Dynatrace:** confirm the token is stored (`sbx secret ls`
-shows a `dynatrace` entry) and that it carries the required scopes
-(`storage:*:read` for SaaS DQL; `problems.read`/`DataExport` for Managed). See
+**`401`/`403` from Dynatrace:** confirm the secret is stored (`sbx secret ls`)
+and keyed on the right host (`*.apps.dynatrace.com` for SaaS, your cluster host
+for Managed), and that the token carries the required scopes (`storage:*:read`
+for SaaS DQL; `problems.read`/`DataExport` for Managed). See
 [providers/README.md](./providers/README.md#tokens--scopes).
 
 **MCP `list` doesn't show `dynatrace` on the remote target:** the startup

@@ -10,9 +10,9 @@ plus a few `requests`-based runbooks for scripting. What changes per target is
 
 | Target | MCP server | Dynatrace | Credential | How it reaches Dynatrace |
 |---|---|---|---|---|
-| [remote](./remote.md) (default) | **Hosted** by Dynatrace (no install) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set -g dynatrace` | proxy injects `Authorization: Bearer` on the wire |
-| [local](./local.md) | Self-hosted in the sandbox (`@dynatrace-oss/dynatrace-mcp-server`) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set -g dynatrace` | proxy injects `Authorization: Bearer` on the wire |
-| [managed](./managed.md) | Self-hosted (`@dynatrace-oss/dynatrace-managed-mcp-server`) | Dynatrace **Managed** (your cluster) | API token via `sbx secret set -g dynatrace` | proxy injects `Authorization: Api-Token` on the wire |
+| [remote](./remote.md) (default) | **Hosted** by Dynatrace (no install) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set-custom` | proxy injects `Authorization: Bearer` on the wire |
+| [local](./local.md) | Self-hosted in the sandbox (`@dynatrace-oss/dynatrace-mcp-server`) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set-custom` | proxy injects `Authorization: Bearer` on the wire |
+| [managed](./managed.md) | Self-hosted (`@dynatrace-oss/dynatrace-managed-mcp-server`) | Dynatrace **Managed** (your cluster) | API token via `sbx secret set-custom` | proxy injects `Authorization: Api-Token` on the wire |
 
 ## Why `remote` is the default
 
@@ -27,14 +27,19 @@ different API and its own MCP server — that is the `managed` kit.
 ## Notes that apply to every target
 
 1. **The kit never holds a token.** `sbx run` has no `-e` flag by design. You
-   store the token once with sbx's secret manager and the sbx proxy attaches it
-   to outbound requests on the wire, so it never enters the sandbox, shell
-   history, or `ps`. The stored secret is named `dynatrace` (matching
-   `credentials.sources.dynatrace` in the spec).
+   store the token once with `sbx secret set-custom` (Dynatrace isn't a built-in
+   sbx service, so this is the "custom" variant), keyed on the Dynatrace host and
+   an env var. The sbx proxy then swaps the placeholder for the real token on
+   outbound requests, so it never enters the sandbox, shell history, or `ps`.
+   Secrets are global by default (scope one with `--sandbox`).
 
    ```bash
-   echo "$DT_TOKEN" | sbx secret set -g dynatrace    # -g = all sandboxes
-   sbx secret ls                                      # confirm a `dynatrace` entry
+   # SaaS (remote / local)
+   sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
+   # Managed (host must match kits/managed/spec.yaml)
+   sbx secret set-custom --host 'managed.example.com' --env DT_API_TOKEN --value "$DT_TOKEN"
+
+   sbx secret ls   # confirm the secret is stored
    ```
 
 2. **The environment URL is the one value the kit cannot know for you.** SaaS

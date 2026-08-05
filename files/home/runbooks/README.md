@@ -3,9 +3,10 @@
 Runnable demos shipped with the Dynatrace kit. They live at `~/runbooks/` in the
 sandbox and read `DT_ENVIRONMENT` / `DT_PLATFORM_TOKEN` (SaaS) or
 `DT_ENVIRONMENT_CONFIGS` (Managed) from the environment the kit sets up. The
-credential in the sandbox is always a proxy-managed sentinel — the sbx proxy
-swaps in the real token on the wire — so the scripts just send it and let the
-proxy do the rest.
+credential in the sandbox is always a placeholder (stored on the host with
+`sbx secret set-custom`) - the sbx proxy overwrites the auth header with the
+real token on the wire - so the scripts just send it and let the proxy do the
+rest.
 
 They use only the `requests` library the kit installs, plus the small shared
 `dtapi.py` helper.

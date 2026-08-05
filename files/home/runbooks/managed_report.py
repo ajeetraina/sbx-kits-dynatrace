@@ -3,9 +3,9 @@
 
 Ships with the sbx-kits-dynatrace kit (managed target). Reads the cluster
 connection from DT_ENVIRONMENT_CONFIGS (the same JSON the Managed MCP server
-uses) and calls the Managed Environment API v2. The apiToken in that config is a
-proxy-managed sentinel; the sbx proxy swaps in the real API token
-(`Authorization: Api-Token …`) on the wire.
+uses) and calls the Managed Environment API v2. The apiToken in that config is a placeholder;
+the sbx proxy overwrites the `Authorization: Api-Token …` header with the real
+token (stored via `sbx secret set-custom`) on the wire.
 
 Usage (inside the sandbox):
     python3 ~/runbooks/managed_report.py
@@ -41,7 +41,7 @@ def _api_base(cfg):
 def main():
     cfg = _load_config()
     base = _api_base(cfg)
-    token = cfg.get("apiToken", "proxy-managed")  # sentinel; proxy rewrites it
+    token = cfg.get("apiToken", "inject-me")  # placeholder; the proxy rewrites it
     headers = {"Authorization": f"Api-Token {token}", "Accept": "application/json"}
 
     print(f"Dynatrace Managed: {base}  (alias: {cfg.get('alias', '-')})\n")

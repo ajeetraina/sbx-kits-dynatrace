@@ -14,7 +14,7 @@ server runs *in the sandbox* instead of being hosted by Dynatrace.
 | MCP server | `mcp-server-dynatrace` in the sandbox (pinned `2.1.2`) |
 | Dynatrace | SaaS (`*.apps.dynatrace.com`) |
 | Environment URL | you set it (`DT_ENVIRONMENT`) |
-| Credential | platform token via `sbx secret set -g dynatrace` |
+| Credential | platform token via `sbx secret set-custom` |
 
 ## 1. Create a platform token
 
@@ -23,8 +23,12 @@ scopes (see [providers/README.md](./README.md#tokens--scopes)).
 
 ## 2. Store the token
 
+The `--env DT_PLATFORM_TOKEN` is important here: the self-hosted MCP server reads
+its token from that env var, and `set-custom` sets it to the proxy-swapped
+placeholder.
+
 ```bash
-echo "$DT_TOKEN" | sbx secret set -g dynatrace
+sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
 ```
 
 ## 3. Set your environment URL
@@ -36,7 +40,7 @@ inside the sandbox. Use the Gen3 **apps** URL, not `*.live.dynatrace.com`.
 ## Run
 
 ```bash
-echo "$DT_TOKEN" | sbx secret set -g dynatrace
+sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
 sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:local claude
 # or from an edited clone:
 sbx run --kit ./kits/local claude

@@ -2,14 +2,15 @@ schemaVersion: "1"
 kind: mixin
 name: dynatrace
 displayName: Dynatrace Managed (self-hosted)
-description: "Installs the Dynatrace Managed MCP server (@dynatrace-oss/dynatrace-managed-mcp-server) and wires it to a self-hosted Dynatrace Managed cluster. Edit the cluster host in this spec, store the API token with `sbx secret set -g dynatrace`, and the sbx proxy injects it as an Api-Token header. Meant to be run from a local clone: sbx run --kit ./kits/managed"
+description: "Installs the Dynatrace Managed MCP server (@dynatrace-oss/dynatrace-managed-mcp-server) and wires it to a self-hosted Dynatrace Managed cluster. Edit the cluster host in this spec, store the API token with `sbx secret set-custom --host <cluster-host> --env DT_API_TOKEN --value \"$DT_TOKEN\"`, and the sbx proxy injects it as an Api-Token header. Meant to be run from a local clone: sbx run --kit ./kits/managed"
 sourceURL: https://github.com/ajeetraina/sbx-kits-dynatrace
 
 # Dynatrace Managed clusters live on a hostname only you know, so this kit is
 # meant to be run from a local clone you edit. Replace managed.example.com below
 # with your cluster host in ALL THREE places (allowedDomains, serviceDomains,
-# and the apiEndpointUrl / dynatraceUrl inside DT_ENVIRONMENT_CONFIGS), and set
-# your environment id + alias.
+# and the apiEndpointUrl / dynatraceUrl inside DT_ENVIRONMENT_CONFIGS), set your
+# environment id + alias, and store the token keyed on the SAME host with
+# `sbx secret set-custom --host managed.example.com --env DT_API_TOKEN`.
 network:
   allowedDomains:
     - registry.npmjs.org
@@ -21,29 +22,20 @@ network:
   serviceAuth:
     dynatrace:
       # Dynatrace Managed API v2 authenticates with `Authorization: Api-Token <token>`.
+      # The proxy overwrites this header with the real token stored via set-custom.
       headerName: Authorization
       valueFormat: "Api-Token %s"
 
 environment:
   variables:
-    # One entry per Managed environment. apiToken is a sentinel — the sbx proxy
-    # swaps in the real token from the stored `dynatrace` secret on the wire, so
-    # it never enters the sandbox. Edit apiEndpointUrl/dynatraceUrl/environmentId/
-    # alias for your cluster (keep apiToken as "proxy-managed").
+    # One entry per Managed environment. apiToken is a placeholder - the sbx
+    # proxy overwrites the Api-Token header with the real token from the stored
+    # secret on the wire, so it never enters the sandbox. Edit apiEndpointUrl/
+    # dynatraceUrl/environmentId/alias for your cluster (leave apiToken as-is).
     DT_ENVIRONMENT_CONFIGS: |
-      [{"dynatraceUrl":"https://managed.example.com/e/","apiEndpointUrl":"https://managed.example.com/e/","environmentId":"YOUR-ENV-ID","alias":"prod","apiToken":"proxy-managed"}]
-    # Declared so the credential wiring names the same sentinel the proxy injects.
-    DT_API_TOKEN: "proxy-managed"
+      [{"dynatraceUrl":"https://managed.example.com/e/","apiEndpointUrl":"https://managed.example.com/e/","environmentId":"YOUR-ENV-ID","alias":"prod","apiToken":"inject-me"}]
     NO_PROXY: "localhost,127.0.0.1,host.docker.internal"
     no_proxy: "localhost,127.0.0.1,host.docker.internal"
-  proxyManaged:
-    - DT_API_TOKEN
-
-credentials:
-  sources:
-    dynatrace:
-      env:
-        - DT_API_TOKEN
 
 commands:
   install:
@@ -61,7 +53,7 @@ commands:
     - path: /home/agent/.dynatrace/mcp.json
       mode: "0644"
       onlyIfMissing: true
-      description: "Portable stdio MCP definition for Dynatrace Managed — edit the cluster host / env id"
+      description: "Portable stdio MCP definition for Dynatrace Managed - edit the cluster host / env id"
       content: |
         {
           "mcpServers": {
@@ -69,7 +61,7 @@ commands:
               "command": "mcp-server-dynatrace",
               "args": [],
               "env": {
-                "DT_ENVIRONMENT_CONFIGS": "[{\"dynatraceUrl\":\"https://managed.example.com/e/\",\"apiEndpointUrl\":\"https://managed.example.com/e/\",\"environmentId\":\"YOUR-ENV-ID\",\"alias\":\"prod\",\"apiToken\":\"proxy-managed\"}]"
+                "DT_ENVIRONMENT_CONFIGS": "[{\"dynatraceUrl\":\"https://managed.example.com/e/\",\"apiEndpointUrl\":\"https://managed.example.com/e/\",\"environmentId\":\"YOUR-ENV-ID\",\"alias\":\"prod\",\"apiToken\":\"inject-me\"}]"
               }
             }
           }
@@ -84,9 +76,9 @@ memory: |
   events, metrics, logs and topology from the Managed Environment API.
 
   No token lives in the sandbox: the `apiToken` in `DT_ENVIRONMENT_CONFIGS` is a
-  proxy-managed placeholder and the sbx proxy swaps in the real API token
-  (`Authorization: Api-Token …`) on outbound requests to your cluster host. Note
-  Managed uses classic API-token scopes (problems.read, entities.read,
-  securityProblems.read, DataExport, …), which differ from SaaS platform tokens.
-  The `~/runbooks/managed_report.py` runbook prints open problems via the
-  Managed Environment API v2.
+  placeholder, and the sbx proxy overwrites the `Authorization: Api-Token …`
+  header with the real token (stored via `sbx secret set-custom` keyed on your
+  cluster host) on outbound requests. Note Managed uses classic API-token scopes
+  (problems.read, entities.read, securityProblems.read, DataExport, …), which
+  differ from SaaS platform tokens. The `~/runbooks/managed_report.py` runbook
+  prints open problems via the Managed Environment API v2.
