@@ -9,7 +9,7 @@ proxy overwrites the Authorization header with the real token on the wire, so
 this module just sends `Authorization: Bearer <placeholder>` and lets the proxy
 do the rest.
 
-Not meant to be run directly — imported by run_dql.py and dynatrace_report.py.
+Not meant to be run directly - imported by run_dql.py and dynatrace_report.py.
 """
 import os
 import sys

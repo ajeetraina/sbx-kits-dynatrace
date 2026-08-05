@@ -84,5 +84,5 @@ End-to-end, through the Grail DQL API (the single most useful check):
 ```
 
 Then just ask the agent, e.g. *"list the open problems in Dynatrace"* or *"run
-the DQL `fetch logs | limit 5` and summarize"* — it drives the Dynatrace MCP
+the DQL `fetch logs | limit 5` and summarize"* - it drives the Dynatrace MCP
 tools.

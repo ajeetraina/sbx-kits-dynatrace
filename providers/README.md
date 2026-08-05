@@ -1,7 +1,7 @@
 # Dynatrace targets for the kit
 
-The kit gives your agent hands-on access to Dynatrace — problems, security
-vulnerabilities, entities, logs, and DQL queries against Grail — through the
+The kit gives your agent hands-on access to Dynatrace - problems, security
+vulnerabilities, entities, logs, and DQL queries against Grail - through the
 official [Dynatrace MCP server](https://github.com/dynatrace-oss/dynatrace-mcp),
 plus a few `requests`-based runbooks for scripting. What changes per target is
 *which Dynatrace* it points at and *how the MCP server is hosted*.
@@ -22,7 +22,7 @@ is always up to date, and it needs no infrastructure. The self-hosted local
 server still works and ships as the `local` kit, but it is in maintenance mode
 upstream. Both target Dynatrace **SaaS** (the Gen3 `*.apps.dynatrace.com`
 platform with Grail/DQL). Dynatrace **Managed** (self-hosted clusters) has a
-different API and its own MCP server — that is the `managed` kit.
+different API and its own MCP server - that is the `managed` kit.
 
 ## Notes that apply to every target
 

@@ -7,7 +7,7 @@ classic API token (`Authorization: Api-Token …`), which the sbx proxy injects 
 the wire.
 
 Because only you know your cluster hostname, this target is meant to be run from
-a **local clone you edit** — the sandbox egress allow-list must name your
+a **local clone you edit** - the sandbox egress allow-list must name your
 cluster, and a baked image can't.
 
 | | |
@@ -20,7 +20,7 @@ cluster, and a baked image can't.
 ## 1. Create an API token
 
 In your Managed environment: *Settings → Integration → Dynatrace API →
-Generate token*, with the read scopes you need — `problems.read`,
+Generate token*, with the read scopes you need - `problems.read`,
 `entities.read`, `securityProblems.read`, `events.read`, `logs.read`,
 `metrics.read`, `DataExport`.
 
@@ -41,7 +41,7 @@ command above):
 
 - `network.allowedDomains` (so the sandbox may reach it)
 - `network.serviceDomains` (so the proxy attaches the token to it)
-- `DT_ENVIRONMENT_CONFIGS` — set `apiEndpointUrl`, `dynatraceUrl`,
+- `DT_ENVIRONMENT_CONFIGS` - set `apiEndpointUrl`, `dynatraceUrl`,
   `environmentId`, and `alias`; leave `apiToken` as `"inject-me"` (the
   placeholder the proxy replaces). Update the same JSON in the `mcp.json` initFile.
 

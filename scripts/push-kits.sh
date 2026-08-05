@@ -8,7 +8,7 @@ image="docker.io/$namespace/sbx-dynatrace-kits"
 
 # publish SPEC_DIR IMAGE_TAG README_FILE [FILES_DIR]
 # Stages a kit (spec.yaml + README + LICENSE), validates it, and pushes one tag.
-# If FILES_DIR is given, its whole tree is staged as the kit's files/ dir — the
+# If FILES_DIR is given, its whole tree is staged as the kit's files/ dir - the
 # sbx-kits-contrib convention where everything under files/home is mirrored into
 # /home/agent/ in the sandbox. That's how the runbooks ship without being
 # hard-coded into spec.yaml: drop a *.py in files/home/runbooks/, no spec edit.

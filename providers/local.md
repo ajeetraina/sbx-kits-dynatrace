@@ -2,7 +2,7 @@
 
 Installs the Dynatrace MCP server (`@dynatrace-oss/dynatrace-mcp-server`) inside
 the sandbox and wires it to your SaaS environment. Same SaaS target and same
-credential model as [remote](./remote.md) — the only difference is that the MCP
+credential model as [remote](./remote.md) - the only difference is that the MCP
 server runs *in the sandbox* instead of being hosted by Dynatrace.
 
 > The upstream local server is in **maintenance mode** (final release `2.1.2`);
@@ -18,7 +18,7 @@ server runs *in the sandbox* instead of being hosted by Dynatrace.
 
 ## 1. Create a platform token
 
-Same as remote — a `dt0s16.…` platform token with the read-only observability
+Same as remote - a `dt0s16.…` platform token with the read-only observability
 scopes (see [providers/README.md](./README.md#tokens--scopes)).
 
 ## 2. Store the token
@@ -52,7 +52,7 @@ sbx run --kit ./kits/local claude
   `mcp-server-dynatrace`) and registers it with the Claude agent at startup.
 - `DT_MCP_TOKEN_STORAGE=file` so it runs headless (no OS keychain / browser
   login), and `DT_MCP_DISABLE_TELEMETRY=true` to keep egress tight.
-- Same proxy-injected `Authorization: Bearer` wiring as remote — the token is a
+- Same proxy-injected `Authorization: Bearer` wiring as remote - the token is a
   placeholder in the sandbox and swapped on the wire for `*.apps.dynatrace.com`.
 
 ## Verify (inside the sandbox)

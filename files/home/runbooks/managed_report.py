@@ -55,7 +55,7 @@ def main():
     if resp.status_code >= 400:
         hint = ""
         if resp.status_code in (401, 403):
-            hint = " — is a token stored (`sbx secret ls` -> `dynatrace`) with problems.read / DataExport scope?"
+            hint = " - is a token stored (`sbx secret ls` -> `dynatrace`) with problems.read / DataExport scope?"
         raise RuntimeError(f"{resp.url} -> {resp.status_code}: {resp.text[:400]}{hint}")
 
     problems = resp.json().get("problems", [])

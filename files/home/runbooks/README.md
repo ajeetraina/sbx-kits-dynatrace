@@ -16,7 +16,7 @@ They use only the `requests` library the kit installs, plus the small shared
 ### run_dql.py
 
 The flagship end-to-end check. Runs a DQL query against Grail and prints the
-result — exercises `DT_ENVIRONMENT`, the proxy-injected platform token, and a
+result - exercises `DT_ENVIRONMENT`, the proxy-injected platform token, and a
 live query in one shot.
 
 ```console
@@ -48,7 +48,7 @@ python3 ~/runbooks/managed_report.py
 
 ---
 
-To add a runbook, drop a `*.py` in `files/home/runbooks/` — it ships
+To add a runbook, drop a `*.py` in `files/home/runbooks/` - it ships
 automatically (the [sbx-kits-contrib][contrib] `files/home/` convention mirrors
 everything under it into `/home/agent/`), no `spec.yaml` change.
 

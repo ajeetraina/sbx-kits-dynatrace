@@ -32,7 +32,7 @@ def main():
         print("(no records)")
         return
 
-    # Print each record as compact JSON — records are dicts keyed by field name.
+    # Print each record as compact JSON - records are dicts keyed by field name.
     for i, rec in enumerate(records, 1):
         print(f"{i:>3}. {json.dumps(rec, default=str, ensure_ascii=False)}")
     print(f"\n{len(records)} record(s).")

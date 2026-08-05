@@ -3,7 +3,7 @@
 
 Ships with the sbx-kits-dynatrace kit (remote / local SaaS targets). Uses DQL
 against Grail (via dtapi) to summarize recent problems, open security
-vulnerabilities, and monitored hosts — a one-shot proof that the kit reaches
+vulnerabilities, and monitored hosts - a one-shot proof that the kit reaches
 Dynatrace and can query it.
 
 Usage (inside the sandbox):
