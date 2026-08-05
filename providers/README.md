@@ -16,7 +16,7 @@ plus a few `requests`-based runbooks for scripting. What changes per target is
 
 ## Why `remote` is the default
 
-Dynatrace's guidance for local-dev clients (VS Code, Claude Code, Cursor, …) is
+Dynatrace's guidance for local-dev clients (VS Code, Claude Code, Cursor, ...) is
 to use the hosted **Remote MCP server**: nothing is installed in the sandbox, it
 is always up to date, and it needs no infrastructure. The self-hosted local
 server still works and ships as the `local` kit, but it is in maintenance mode
@@ -51,8 +51,8 @@ different API and its own MCP server - that is the `managed` kit.
 
 ## Tokens & scopes
 
-- **SaaS (`remote`, `local`)** use a **platform token** (`dt0s16.…`), created
-  under *Account Management → Identity & access management → Platform tokens*.
+- **SaaS (`remote`, `local`)** use a **platform token** (`dt0s16....`), created
+  under *Account Management -> Identity & access management -> Platform tokens*.
   A read-only observability set: `app-engine:apps:run`, `storage:buckets:read`,
   `storage:logs:read`, `storage:metrics:read`, `storage:events:read`,
   `storage:entities:read`, `storage:spans:read`, `storage:bizevents:read`,

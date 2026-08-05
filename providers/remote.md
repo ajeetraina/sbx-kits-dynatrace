@@ -15,9 +15,9 @@ it never enters the sandbox.
 
 ## 1. Create a platform token
 
-In Dynatrace: *Account Management → Identity & access management → Platform
-tokens → Generate new token*. Give it the read-only observability scopes (see
-[providers/README.md](./README.md#tokens--scopes)). Copy the `dt0s16.…` value.
+In Dynatrace: *Account Management -> Identity & access management -> Platform
+tokens -> Generate new token*. Give it the read-only observability scopes (see
+[providers/README.md](./README.md#tokens--scopes)). Copy the `dt0s16....` value.
 
 ## 2. Store the token as a secret (never baked into the kit)
 

@@ -76,9 +76,9 @@ memory: |
   events, metrics, logs and topology from the Managed Environment API.
 
   No token lives in the sandbox: the `apiToken` in `DT_ENVIRONMENT_CONFIGS` is a
-  placeholder, and the sbx proxy overwrites the `Authorization: Api-Token …`
+  placeholder, and the sbx proxy overwrites the `Authorization: Api-Token ...`
   header with the real token (stored via `sbx secret set-custom` keyed on your
   cluster host) on outbound requests. Note Managed uses classic API-token scopes
-  (problems.read, entities.read, securityProblems.read, DataExport, …), which
+  (problems.read, entities.read, securityProblems.read, DataExport, ...), which
   differ from SaaS platform tokens. The `~/runbooks/managed_report.py` runbook
   prints open problems via the Managed Environment API v2.

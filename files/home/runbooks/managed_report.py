@@ -4,7 +4,7 @@
 Ships with the sbx-kits-dynatrace kit (managed target). Reads the cluster
 connection from DT_ENVIRONMENT_CONFIGS (the same JSON the Managed MCP server
 uses) and calls the Managed Environment API v2. The apiToken in that config is a placeholder;
-the sbx proxy overwrites the `Authorization: Api-Token …` header with the real
+the sbx proxy overwrites the `Authorization: Api-Token ...` header with the real
 token (stored via `sbx secret set-custom`) on the wire.
 
 Usage (inside the sandbox):

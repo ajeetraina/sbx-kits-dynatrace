@@ -42,9 +42,9 @@ sbx login
 
 ### 1. Create a Dynatrace token
 
-- **SaaS** (`remote` / `local` targets): a **platform token** (`dt0s16.…`) under
-  *Account Management → Identity & access management → Platform tokens*.
-- **Managed** target: a classic **API token** in *Settings → Integration →
+- **SaaS** (`remote` / `local` targets): a **platform token** (`dt0s16....`) under
+  *Account Management -> Identity & access management -> Platform tokens*.
+- **Managed** target: a classic **API token** in *Settings -> Integration ->
   Dynatrace API*.
 
 See [providers/README.md](./providers/README.md#tokens--scopes) for the
@@ -167,7 +167,7 @@ On the Claude agent the server is registered automatically. Then just ask, e.g.
 *"list the open problems in Dynatrace"*, *"any critical vulnerabilities?"*, or
 *"run the DQL `fetch logs | limit 5` and summarize"* - it drives the Dynatrace
 MCP tools (`list_problems`, `list_vulnerabilities`, `execute_dql`,
-`find_entity_by_name`, Davis CoPilot, …). For other agents, import
+`find_entity_by_name`, Davis CoPilot, ...). For other agents, import
 `~/.dynatrace/mcp.json`.
 
 ### 6. Try a runbook
@@ -216,7 +216,7 @@ for SaaS DQL; `problems.read`/`DataExport` for Managed). See
 
 **MCP `list` doesn't show `dynatrace` on the remote target:** the startup
 registration is skipped while `DT_ENVIRONMENT` is still the placeholder. Set it,
-then re-run the `claude mcp add --transport http …` command from
+then re-run the `claude mcp add --transport http ...` command from
 [providers/remote.md](./providers/remote.md#3-set-your-environment-url).
 
 ## License

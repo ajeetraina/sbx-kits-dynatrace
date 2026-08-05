@@ -18,7 +18,7 @@ server runs *in the sandbox* instead of being hosted by Dynatrace.
 
 ## 1. Create a platform token
 
-Same as remote - a `dt0s16.…` platform token with the read-only observability
+Same as remote - a `dt0s16....` platform token with the read-only observability
 scopes (see [providers/README.md](./README.md#tokens--scopes)).
 
 ## 2. Store the token

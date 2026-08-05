@@ -3,7 +3,7 @@
 Installs the Dynatrace Managed MCP server
 (`@dynatrace-oss/dynatrace-managed-mcp-server`) and wires it to a self-hosted
 Dynatrace **Managed** cluster. Managed has a different API from SaaS and uses a
-classic API token (`Authorization: Api-Token …`), which the sbx proxy injects on
+classic API token (`Authorization: Api-Token ...`), which the sbx proxy injects on
 the wire.
 
 Because only you know your cluster hostname, this target is meant to be run from
@@ -19,7 +19,7 @@ cluster, and a baked image can't.
 
 ## 1. Create an API token
 
-In your Managed environment: *Settings → Integration → Dynatrace API →
+In your Managed environment: *Settings -> Integration -> Dynatrace API ->
 Generate token*, with the read scopes you need - `problems.read`,
 `entities.read`, `securityProblems.read`, `events.read`, `logs.read`,
 `metrics.read`, `DataExport`.
