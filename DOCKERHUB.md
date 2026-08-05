@@ -1,0 +1,58 @@
+# Dynatrace kit for Docker Sandboxes
+
+A standalone [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
+(`kind: mixin`) that gives any sandbox agent access to
+[Dynatrace](https://www.dynatrace.com/) — problems, security vulnerabilities,
+entities, logs, and DQL queries against Grail — through the official
+[Dynatrace MCP server](https://github.com/dynatrace-oss/dynatrace-mcp), plus
+`requests`-based runbooks. This image ships in three target flavors, one per tag.
+
+Source and full docs: https://github.com/ajeetraina/sbx-kits-dynatrace
+
+## Image tags
+
+| Tag | MCP server | Dynatrace | Credential |
+|-----|------------|-----------|------------|
+| `latest`, `remote` | Hosted by Dynatrace (Remote MCP) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set -g dynatrace` |
+| `local` | Self-hosted in the sandbox | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set -g dynatrace` |
+| `managed` | Self-hosted (Managed build) | Dynatrace Managed cluster | API token via `sbx secret set -g dynatrace` |
+
+`remote` is the default because it needs no install and is Dynatrace's
+recommended path for local-dev clients: the MCP server is hosted, and the
+sandbox reaches it over `*.apps.dynatrace.com` with the token injected on the
+wire. `local` runs a self-hosted MCP server in the sandbox instead; `managed`
+targets a self-hosted Dynatrace Managed cluster.
+
+## Quick start
+
+Remote default. Store a platform token once (never on the command line), set
+your environment URL (see the repo's providers/remote.md), then launch:
+
+    echo "$DT_TOKEN" | sbx secret set -g dynatrace
+    sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:latest claude
+
+Self-hosted SaaS MCP:
+
+    echo "$DT_TOKEN" | sbx secret set -g dynatrace
+    sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:local claude
+
+Dynatrace Managed (edit kits/managed/spec.yaml with your cluster host first):
+
+    echo "$DT_TOKEN" | sbx secret set -g dynatrace
+    sbx run --kit ./kits/managed claude
+
+No tag holds a token. The sbx proxy injects it from the stored secret, so the
+token never enters the sandbox. `sbx run` has no `-e` flag by design.
+
+## How it works
+
+Each kit wires up the Dynatrace MCP server for its target, sets `DT_ENVIRONMENT`,
+writes a portable MCP definition to `~/.dynatrace/mcp.json`, and (best-effort)
+registers the server with the Claude agent. Dynatrace traffic is routed through
+the sbx proxy, which attaches the stored token (`Authorization: Bearer` for SaaS
+platform tokens, `Api-Token` for Managed) on the wire. It also ships runbooks
+(`~/runbooks/run_dql.py`, `dynatrace_report.py`, `managed_report.py`) that query
+Dynatrace directly.
+
+Per-target setup, validation, and the raw `spec.yaml` for each kit live on
+GitHub: https://github.com/ajeetraina/sbx-kits-dynatrace/tree/main/providers
