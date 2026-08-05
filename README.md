@@ -2,8 +2,8 @@
 
 A standalone [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
 (`kind: mixin`) that gives any sandbox agent hands-on access to
-[Dynatrace](https://www.dynatrace.com/) — problems, security vulnerabilities,
-entities, logs, and DQL queries against Grail — through the official
+[Dynatrace](https://www.dynatrace.com/) - problems, security vulnerabilities,
+entities, logs, and DQL queries against Grail - through the official
 [Dynatrace MCP server](https://github.com/dynatrace-oss/dynatrace-mcp), plus a
 few `requests`-based runbooks for scripting.
 
@@ -15,7 +15,7 @@ The target is swappable to a self-hosted MCP server or to Dynatrace Managed. See
 
 Layered onto an agent, the mixin does four observable things:
 
-1. Wires up the Dynatrace MCP server for the chosen target — the **hosted Remote
+1. Wires up the Dynatrace MCP server for the chosen target - the **hosted Remote
    MCP** (default, no install), a **self-hosted** stdio server
    (`@dynatrace-oss/dynatrace-mcp-server`), or the **Managed** server
    (`@dynatrace-oss/dynatrace-managed-mcp-server`).
@@ -62,19 +62,19 @@ sbx secret ls                                     # confirm a `dynatrace` entry
 
 ### 3. Launch the sandbox with the kit
 
-Each target is published as its own image tag — pick the one matching your setup.
+Each target is published as its own image tag - pick the one matching your setup.
 `DT_ENVIRONMENT` (your `https://<env>.apps.dynatrace.com` URL) is the one value
 the kit can't know for you: edit it in a local clone or `export` it in-sandbox
 (see each provider page).
 
 ```console
-# Dynatrace SaaS via the hosted Remote MCP (default, recommended) — :latest == :remote
+# Dynatrace SaaS via the hosted Remote MCP (default, recommended) - :latest == :remote
 sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:latest claude
 
 # Dynatrace SaaS via a self-hosted MCP server in the sandbox
 sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:local claude
 
-# Dynatrace Managed (self-hosted cluster) — edit kits/managed/spec.yaml first
+# Dynatrace Managed (self-hosted cluster) - edit kits/managed/spec.yaml first
 sbx run --kit ./kits/managed claude
 ```
 
@@ -94,7 +94,7 @@ sbx run --kit ./sbx-kits-dynatrace/ claude
 #### Choosing the agent
 
 The trailing argument (`claude` above) is the **coding agent** that runs inside
-the sandbox — a separate axis from the target tag. The tag (`:remote`, `:local`,
+the sandbox - a separate axis from the target tag. The tag (`:remote`, `:local`,
 `:managed`) decides which Dynatrace the tooling points at; the agent decides
 which assistant you interact with. `sbx run --help` lists them:
 
@@ -131,7 +131,7 @@ on PATH: `!command -v mcp-server-dynatrace`.
 !env | grep -E 'DT_ENVIRONMENT|DT_PLATFORM_TOKEN'
 ```
 
-`DT_PLATFORM_TOKEN` reads `proxy-managed` — that's the sentinel; the real token
+`DT_PLATFORM_TOKEN` reads `proxy-managed` - that's the sentinel; the real token
 lives only on the host and is injected on the wire.
 
 **4c. The portable MCP definition the kit wrote exists:**
@@ -140,7 +140,7 @@ lives only on the host and is injected on the wire.
 !cat /home/agent/.dynatrace/mcp.json
 ```
 
-**4d. End-to-end functional proof** — reach Dynatrace and run a live DQL query
+**4d. End-to-end functional proof** - reach Dynatrace and run a live DQL query
 through the Grail query API. This exercises `requests`, the env vars, the
 proxy-injected token, and the connection to Dynatrace, so if you only run one
 check, run this one (SaaS targets):
@@ -156,7 +156,7 @@ Expect recent problems printed as records. For Managed, run
 
 On the Claude agent the server is registered automatically. Then just ask, e.g.
 *"list the open problems in Dynatrace"*, *"any critical vulnerabilities?"*, or
-*"run the DQL `fetch logs | limit 5` and summarize"* — it drives the Dynatrace
+*"run the DQL `fetch logs | limit 5` and summarize"* - it drives the Dynatrace
 MCP tools (`list_problems`, `list_vulnerabilities`, `execute_dql`,
 `find_entity_by_name`, Davis CoPilot, …). For other agents, import
 `~/.dynatrace/mcp.json`.
@@ -165,7 +165,7 @@ MCP tools (`list_problems`, `list_vulnerabilities`, `execute_dql`,
 
 The kit ships runnable demos under `~/runbooks/`. They are plain files under
 [`files/home/runbooks/`](./files/home/runbooks/) (the
-[sbx-kits-contrib][contrib] `files/home/` convention — everything under it is
+[sbx-kits-contrib][contrib] `files/home/` convention - everything under it is
 mirrored into `/home/agent/`), **not** hard-coded into `spec.yaml`:
 
 ```console
@@ -173,7 +173,7 @@ mirrored into `/home/agent/`), **not** hard-coded into `spec.yaml`:
 !python3 ~/runbooks/dynatrace_report.py
 ```
 
-To add a runbook, drop a `*.py` in `files/home/runbooks/` — it ships
+To add a runbook, drop a `*.py` in `files/home/runbooks/` - it ships
 automatically, no `spec.yaml` change.
 
 [contrib]: https://github.com/docker/sbx-kits-contrib
@@ -196,7 +196,7 @@ the sbx runtime refuses to mount your home directory into the sandbox. Run
 `sbx run` from any directory other than your home directory.
 
 **`run_dql.py` fails with `DT_ENVIRONMENT is not set`:** set it to your Gen3
-apps URL — `export DT_ENVIRONMENT=https://<env>.apps.dynatrace.com` (not the
+apps URL - `export DT_ENVIRONMENT=https://<env>.apps.dynatrace.com` (not the
 classic `*.live.dynatrace.com`), or edit the spec in a clone.
 
 **`401`/`403` from Dynatrace:** confirm the token is stored (`sbx secret ls`
