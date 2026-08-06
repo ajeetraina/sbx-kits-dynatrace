@@ -1,26 +1,32 @@
-schemaVersion: "1"
+schemaVersion: "2"
 kind: mixin
 name: dynatrace
 displayName: Dynatrace (SaaS, Remote MCP)
-description: "Wires an agent to a Dynatrace SaaS environment through the official hosted Dynatrace Remote MCP server (no install) - query problems, vulnerabilities, entities, logs and run DQL against Grail. The kit holds no token: store it once with `sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value \"$DT_TOKEN\"` and the sbx proxy injects it as a Bearer token on requests to *.apps.dynatrace.com."
+description: "Wires an agent to a Dynatrace SaaS environment through the official hosted Dynatrace Remote MCP server (no install) - query problems, vulnerabilities, entities, logs and run DQL against Grail. The kit holds no token: store it once with `sbx secret set -g dynatrace` and the sbx proxy injects it as a Bearer token on requests to *.apps.dynatrace.com."
 sourceURL: https://github.com/ajeetraina/sbx-kits-dynatrace
 
-network:
-  allowedDomains:
-    - pypi.org                 # requests, used by the runbooks
-    - files.pythonhosted.org
-    - "*.apps.dynatrace.com"   # Dynatrace SaaS platform (Remote MCP + Grail DQL API)
-  # Route every request to the SaaS platform through the "dynatrace" service so
-  # the proxy attaches the platform token to the Authorization header. All Gen3
-  # SaaS platform traffic (the Remote MCP gateway and the DQL query API) lives
-  # under *.apps.dynatrace.com. The secret itself is supplied out-of-band with
-  # `sbx secret set-custom` (see the README), keyed on this same host.
-  serviceDomains:
-    "*.apps.dynatrace.com": dynatrace
-  serviceAuth:
-    dynatrace:
-      headerName: Authorization
-      valueFormat: "Bearer %s"
+# Dynatrace SaaS platform surface: the Remote MCP gateway and the Grail DQL query
+# API both live under *.apps.dynatrace.com.
+caps:
+  network:
+    allow:
+      - pypi.org                 # requests, used by the runbooks
+      - files.pythonhosted.org
+      - "*.apps.dynatrace.com"   # Dynatrace SaaS platform (Remote MCP + Grail DQL API)
+
+# The real platform token never enters the container. Tooling sends the sentinel
+# value as `Authorization: Bearer proxy-managed`; the sbx proxy swaps in the real
+# platform token from `sbx secret set -g dynatrace` on outbound requests to the
+# SaaS host, so the token stays out of the sandbox, shell history, and `ps`.
+credentials:
+  - service: dynatrace
+    description: "Dynatrace SaaS platform token (dt0s16...), injected as the Bearer credential on requests to the SaaS platform."
+    apiKey:
+      name: DT_PLATFORM_TOKEN
+      inject:
+        - domain: "*.apps.dynatrace.com"
+          header: Authorization
+          format: "Bearer %s"
 
 environment:
   variables:
@@ -29,6 +35,8 @@ environment:
     # value the kit cannot know for you - edit it in a local clone
     # (`sbx run --kit ./kits/remote`) or `export DT_ENVIRONMENT=...` in-sandbox.
     DT_ENVIRONMENT: "https://YOUR-ENV.apps.dynatrace.com"
+    # Sentinel: replaced by the proxy on outbound Dynatrace requests (see credentials).
+    DT_PLATFORM_TOKEN: "proxy-managed"
     NO_PROXY: "localhost,127.0.0.1,host.docker.internal"
     no_proxy: "localhost,127.0.0.1,host.docker.internal"
 
@@ -63,7 +71,8 @@ commands:
             }
           }
         }
-memory: |
+
+agentContext: |
   ## Dynatrace observability tooling (SaaS, Remote MCP)
 
   The official Dynatrace **Remote MCP server** is registered with the agent as
@@ -73,10 +82,11 @@ memory: |
   vulnerabilities and exceptions, find entities, run and explain DQL against
   Grail, and talk to Davis CoPilot.
 
-  No token lives in the sandbox: it is stored on the host with
-  `sbx secret set-custom` keyed on `*.apps.dynatrace.com`, and the sbx proxy
-  overwrites the `Authorization` header with the real platform token on outbound
-  requests to that host. If MCP calls fail with auth errors, check that
+  No token lives in the sandbox: the `DT_PLATFORM_TOKEN` env var holds the
+  sentinel `proxy-managed`, NOT the real token. It is stored on the host with
+  `sbx secret set -g dynatrace`, and the sbx proxy overwrites the `Authorization`
+  header with the real platform token on outbound requests to
+  `*.apps.dynatrace.com`. If MCP calls fail with auth errors, check that
   `DT_ENVIRONMENT` is your real `*.apps.dynatrace.com` URL and that the secret is
   stored (`sbx secret ls`).
 
