@@ -11,6 +11,32 @@ The **hosted Remote MCP server** for Dynatrace SaaS is the zero-install default.
 The target is swappable to a self-hosted MCP server or to Dynatrace Managed. See
 [providers/](./providers/) for copy-paste config.
 
+## Quickstart (SaaS)
+
+```bash
+# 1. Sign in to Docker Hub
+sbx login
+
+# 2. Store your platform token on the host (once) — it never enters the sandbox
+sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value 'dt0s16....'
+
+# 3. Launch the kit — run from a repo clone, NOT your home directory
+git clone https://github.com/ajeetraina/sbx-kits-dynatrace.git
+cd sbx-kits-dynatrace
+sbx run --kit ./kits/remote claude
+
+# 4. Inside the sandbox: point at your environment and prove it end-to-end
+export DT_ENVIRONMENT=https://<your-env>.apps.dynatrace.com
+python3 ~/runbooks/run_dql.py          # expect records or "(no records)", not a 401
+python3 ~/runbooks/dynatrace_report.py # problems, vulnerabilities, hosts
+
+# 5. Or just ask the agent: "list the open problems in Dynatrace"
+```
+
+`env | grep DT_PLATFORM_TOKEN` inside the sandbox shows an `sbx-cs-…` placeholder,
+never your real `dt0s16.` token. Full walkthrough and the `local` / `managed`
+targets are below.
+
 ## What the kit does
 
 Layered onto an agent, the mixin does four observable things:
