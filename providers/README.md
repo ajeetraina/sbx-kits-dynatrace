@@ -49,6 +49,20 @@ different API and its own MCP server - that is the `managed` kit.
    (`sbx run --kit ./kits/<target>`) or, for SaaS, `export DT_ENVIRONMENT=...`
    inside the sandbox.
 
+3. **Network egress must be allowed.** The kit declares its hosts in the spec,
+   but if you self-manage sbx policy without centralized AI governance, allow
+   the kit's egress once so sandbox requests aren't denied:
+
+   ```bash
+   # SaaS (remote / local)
+   sbx policy allow network "*.apps.dynatrace.com,pypi.org,files.pythonhosted.org"
+   # Managed (swap in your cluster host; npm is needed for the self-hosted MCP)
+   sbx policy allow network "managed.example.com,registry.npmjs.org,pypi.org,files.pythonhosted.org"
+   ```
+
+   Under org-managed governance a local allow cannot widen egress - an admin
+   adds the rule. `sbx policy log <sandbox>` names any host that was blocked.
+
 ## Tokens & scopes
 
 - **SaaS (`remote`, `local`)** use a **platform token** (`dt0s16....`), created
