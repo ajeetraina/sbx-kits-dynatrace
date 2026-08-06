@@ -94,6 +94,20 @@ sbx secret set-custom --host 'managed.example.com' --env DT_API_TOKEN --value "$
 sbx secret ls   # confirm the secret is stored
 ```
 
+**Self-managed sbx? Allow Dynatrace egress once.** If you are *not* under
+centralized AI governance, permit the kit's hosts so sandbox requests are not
+denied by the network policy (with org-managed governance an admin allows these
+for you - a local allow cannot widen egress):
+
+```console
+sbx policy init balanced   # one-time, only if you have never initialized a policy
+sbx policy allow network "*.apps.dynatrace.com,pypi.org,files.pythonhosted.org"
+```
+
+For the Managed target, allow your cluster host plus `registry.npmjs.org`
+instead. `sbx policy log <sandbox>` shows any host that was blocked, so you can
+allow exactly that one.
+
 ### 3. Launch the sandbox with the kit
 
 Each target is published as its own image tag - pick the one matching your setup.
@@ -229,6 +243,17 @@ Each page has the exact `spec.yaml`, run command, and setup notes. Overview:
 **`mount policy denied: /Users/<you>`** when running `sbx run --kit docker.io/..`:
 the sbx runtime refuses to mount your home directory into the sandbox. Run
 `sbx run` from any directory other than your home directory.
+
+**Network policy denied a Dynatrace request** (egress blocked / connection
+refused reaching `*.apps.dynatrace.com`): if you self-manage sbx policy and have
+no centralized governance, allow the kit's hosts once (global scope):
+
+```console
+sbx policy allow network "*.apps.dynatrace.com,pypi.org,files.pythonhosted.org"
+```
+
+Under org-managed governance a local allow cannot widen egress - an admin must
+add the allow. `sbx policy log <sandbox>` names the exact blocked host.
 
 **`run_dql.py` fails with `DT_ENVIRONMENT is not set`:** set it to your Gen3
 apps URL - `export DT_ENVIRONMENT=https://<env>.apps.dynatrace.com` (not the
