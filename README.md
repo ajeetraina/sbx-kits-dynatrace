@@ -219,6 +219,3 @@ registration is skipped while `DT_ENVIRONMENT` is still the placeholder. Set it,
 then re-run the `claude mcp add --transport http ...` command from
 [providers/remote.md](./providers/remote.md#3-set-your-environment-url).
 
-## License
-
-[Apache 2.0](./LICENSE).
