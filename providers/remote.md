@@ -8,8 +8,9 @@ it never enters the sandbox.
 
 > This is Dynatrace's **production-supported** MCP server (see the
 > [Dynatrace Hub listing](https://www.dynatrace.com/hub/detail/dynatrace-mcp-server)),
-> and the successor to the now-deprecated self-hosted server used by the
-> [local](./local.md) kit. Walkthrough:
+> and the successor to the now-deprecated self-hosted server
+> ([github.com/dynatrace-oss/dynatrace-mcp](https://github.com/dynatrace-oss/dynatrace-mcp),
+> final release `2.1.2`). Walkthrough:
 > [Sky-high developer productivity with Dynatrace MCP](https://www.dynatrace.com/news/blog/sky-high-developer-productivity-with-dynatrace-mcp-and-github-copilot/).
 
 | | |

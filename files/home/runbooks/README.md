@@ -11,7 +11,7 @@ rest.
 They use only the `requests` library the kit installs, plus the small shared
 `dtapi.py` helper.
 
-## SaaS targets (`remote`, `local`)
+## SaaS target (`remote`)
 
 ### run_dql.py
 
