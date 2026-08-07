@@ -58,4 +58,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/sbx-dynatrace-kits
           readme-filepath: ./DOCKERHUB.md
-          short-description: "Docker Sandboxes mixin adding the Dynatrace MCP server (remote, managed)"
+          short-description: "Docker Sandboxes mixin adding the Dynatrace hosted Remote MCP server"

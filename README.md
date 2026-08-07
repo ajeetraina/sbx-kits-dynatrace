@@ -6,11 +6,10 @@ A standalone [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
 entities, logs, and DQL queries against Grail - through Dynatrace's hosted
 **Remote MCP server**, plus a few `requests`-based runbooks for scripting.
 
-The **hosted Remote MCP server** for Dynatrace SaaS is the zero-install default.
-The target is swappable to Dynatrace Managed. See
-[providers/](./providers/) for copy-paste config.
+The **hosted Remote MCP server** for Dynatrace SaaS is the zero-install path this
+kit wires up. See [providers/](./providers/) for copy-paste config.
 
-## Quickstart (SaaS)
+## Quickstart
 
 ```bash
 # 1. Sign in to Docker Hub
@@ -33,19 +32,16 @@ python3 ~/runbooks/dynatrace_report.py # problems, vulnerabilities, hosts
 ```
 
 `env | grep DT_PLATFORM_TOKEN` inside the sandbox shows an `sbx-cs-…` placeholder,
-never your real `dt0s16.` token. Full walkthrough and the `managed`
-target are below.
+never your real `dt0s16.` token. Full walkthrough is below.
 
 ## What the kit does
 
 Layered onto an agent, the mixin does four observable things:
 
-1. Wires up the Dynatrace MCP server for the chosen target - the **hosted Remote
-   MCP** (default, no install) or the **Managed** server
-   (`@dynatrace-oss/dynatrace-managed-mcp-server`).
+1. Wires up the Dynatrace **hosted Remote MCP** server (no install) for your SaaS
+   environment.
 2. Installs the `requests` library and ships runbooks under `~/runbooks/` that
-   query Dynatrace directly (DQL against Grail for SaaS; Environment API v2 for
-   Managed).
+   query Dynatrace directly (DQL against Grail).
 3. Sets `DT_ENVIRONMENT` and routes Dynatrace traffic through the sbx proxy so
    the token is attached on the wire, and writes a portable MCP definition to
    `~/.dynatrace/mcp.json`.
@@ -66,10 +62,10 @@ sbx login
 
 ### 1. Create a Dynatrace token
 
-- **SaaS** (`remote` target): a **platform token** (`dt0s16....`) under
-  *Account Management -> Identity & access management -> Platform tokens*.
-- **Managed** target: a classic **API token** in *Settings -> Integration ->
-  Dynatrace API*.
+A **platform token** (`dt0s16....`) under *Account Management -> Identity &
+access management -> Platform tokens*. It needs the gateway scopes
+`mcp-gateway:servers:invoke` and `mcp-gateway:servers:read` plus read-only
+`storage:*:read` scopes.
 
 See [providers/README.md](./providers/README.md#tokens--scopes) for the
 recommended read-only scope set.
@@ -83,11 +79,8 @@ placeholder for the real token on outbound requests, so it never enters the
 sandbox. Secrets are global by default:
 
 ```console
-# SaaS (remote) - platform token, keyed on the apps host
+# Platform token, keyed on the apps host
 sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
-
-# Managed - API token, keyed on your cluster host (matches kits/managed/spec.yaml)
-sbx secret set-custom --host 'managed.example.com' --env DT_API_TOKEN --value "$DT_TOKEN"
 
 sbx secret ls   # confirm the secret is stored
 ```
@@ -102,26 +95,21 @@ sbx policy init balanced   # one-time, only if you have never initialized a poli
 sbx policy allow network "*.apps.dynatrace.com,pypi.org,files.pythonhosted.org"
 ```
 
-For the Managed target, allow your cluster host plus `registry.npmjs.org`
-instead. `sbx policy log <sandbox>` shows any host that was blocked, so you can
-allow exactly that one.
+`sbx policy log <sandbox>` shows any host that was blocked, so you can allow
+exactly that one.
 
 ### 3. Launch the sandbox with the kit
 
-Each target is published as its own image tag - pick the one matching your setup.
 `DT_ENVIRONMENT` (your `https://<env>.apps.dynatrace.com` URL) is the one value
 the kit can't know for you: edit it in a local clone or `export` it in-sandbox
-(see each provider page).
+(see [providers/remote.md](./providers/remote.md)).
 
 ```console
-# Dynatrace SaaS via the hosted Remote MCP (default, recommended) - :latest == :remote
+# Dynatrace SaaS via the hosted Remote MCP - :latest == :remote
 sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:latest claude
-
-# Dynatrace Managed (self-hosted cluster) - edit kits/managed/spec.yaml first
-sbx run --kit ./kits/managed claude
 ```
 
-Or straight from this repo over git (uses the default remote target):
+Or straight from this repo over git:
 
 ```console
 sbx run --kit "git+https://github.com/ajeetraina/sbx-kits-dynatrace.git" claude
@@ -137,9 +125,9 @@ sbx run --kit ./sbx-kits-dynatrace/ claude
 #### Choosing the agent
 
 The trailing argument (`claude` above) is the **coding agent** that runs inside
-the sandbox - a separate axis from the target tag. The tag (`:remote`,
-`:managed`) decides which Dynatrace the tooling points at; the agent decides
-which assistant you interact with. `sbx run --help` lists them:
+the sandbox - a separate axis from the kit. The kit decides which Dynatrace the
+tooling points at; the agent decides which assistant you interact with.
+`sbx run --help` lists them:
 
 ```
 claude, claude-bedrock, codex, copilot, cursor, docker-agent, droid, gemini, kiro, opencode, shell
@@ -165,8 +153,7 @@ inside.
 !claude mcp list
 ```
 
-Expect a `dynatrace` entry. For the `managed` target the binary is also
-on PATH: `!command -v mcp-server-dynatrace`.
+Expect a `dynatrace` entry.
 
 **4b. The mixin's env is present** (a fingerprint that the kit wired things up):
 
@@ -187,14 +174,13 @@ the wire.
 **4d. End-to-end functional proof** - reach Dynatrace and run a live DQL query
 through the Grail query API. This exercises `requests`, the env vars, the
 proxy-injected token, and the connection to Dynatrace, so if you only run one
-check, run this one (SaaS targets):
+check, run this one:
 
 ```console
 !python3 ~/runbooks/run_dql.py
 ```
 
-Expect recent problems printed as records. For Managed, run
-`!python3 ~/runbooks/managed_report.py`.
+Expect recent problems printed as records.
 
 ### 5. Use the MCP server from the agent
 
@@ -222,14 +208,10 @@ automatically, no `spec.yaml` change.
 
 [contrib]: https://github.com/docker/sbx-kits-contrib
 
-## Switching the Dynatrace target
+## Setup reference
 
-| Target | MCP server | Dynatrace | Credential | Doc |
-|---|---|---|---|---|
-| remote (default) | Hosted by Dynatrace | SaaS `*.apps.dynatrace.com` | platform token | [providers/remote.md](./providers/remote.md) |
-| managed | Self-hosted (Managed build) | Dynatrace Managed cluster | API token | [providers/managed.md](./providers/managed.md) |
-
-Each page has the exact `spec.yaml`, run command, and setup notes. Overview:
+[providers/remote.md](./providers/remote.md) has the exact `spec.yaml`, run
+command, token scopes, and setup notes. Overview:
 [providers/README.md](./providers/README.md).
 
 ## Troubleshooting
@@ -254,12 +236,13 @@ apps URL - `export DT_ENVIRONMENT=https://<env>.apps.dynatrace.com` (not the
 classic `*.live.dynatrace.com`), or edit the spec in a clone.
 
 **`401`/`403` from Dynatrace:** confirm the secret is stored (`sbx secret ls`)
-and keyed on the right host (`*.apps.dynatrace.com` for SaaS, your cluster host
-for Managed), and that the token carries the required scopes (`storage:*:read`
-for SaaS DQL; `problems.read`/`DataExport` for Managed). See
+and keyed on `*.apps.dynatrace.com`, and that the token carries the required
+scopes - `mcp-gateway:servers:invoke` and `mcp-gateway:servers:read` for the MCP
+gateway, plus `storage:*:read` for DQL. A token missing the gateway scopes fails
+MCP calls with 403 while the DQL runbooks still work. See
 [providers/README.md](./providers/README.md#tokens--scopes).
 
-**MCP `list` doesn't show `dynatrace` on the remote target:** the startup
+**MCP `list` doesn't show `dynatrace`:** the startup
 registration is skipped while `DT_ENVIRONMENT` is still the placeholder. Set it,
 then re-run the `claude mcp add --transport http ...` command from
 [providers/remote.md](./providers/remote.md#3-set-your-environment-url).

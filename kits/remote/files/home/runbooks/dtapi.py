@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Tiny helper for talking to a Dynatrace SaaS environment from a runbook.
 
-Ships with the sbx-kits-dynatrace kit (remote / local targets). It reads
+Ships with the sbx-kits-dynatrace kit (SaaS, Remote MCP). It reads
 DT_ENVIRONMENT and DT_PLATFORM_TOKEN from the environment the kit sets up and
 executes DQL against the Grail query API. The platform token in the sandbox is a
 placeholder (set by `sbx secret set-custom --env DT_PLATFORM_TOKEN`); the sbx

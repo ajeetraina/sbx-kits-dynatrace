@@ -37,7 +37,7 @@ publish() {
 # canonical files/ tree (runbooks).
 publish "$repo_root" "$tag" "$repo_root/README.md" "$repo_root/files"
 
-# Per-target kits under kits/ -> :<target> (e.g. :remote, :managed).
+# Per-target kits under kits/ -> :<target> (e.g. :remote).
 # Each tag uses its provider doc as the image README. Those docs use repo-relative
 # links; fine on GitHub, cosmetic-only on the Hub page.
 for dir in "$repo_root"/kits/*/; do
