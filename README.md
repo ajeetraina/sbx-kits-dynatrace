@@ -3,12 +3,11 @@
 A standalone [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
 (`kind: mixin`) that gives any sandbox agent hands-on access to
 [Dynatrace](https://www.dynatrace.com/) - problems, security vulnerabilities,
-entities, logs, and DQL queries against Grail - through the official
-[Dynatrace MCP server](https://github.com/dynatrace-oss/dynatrace-mcp), plus a
-few `requests`-based runbooks for scripting.
+entities, logs, and DQL queries against Grail - through Dynatrace's hosted
+**Remote MCP server**, plus a few `requests`-based runbooks for scripting.
 
 The **hosted Remote MCP server** for Dynatrace SaaS is the zero-install default.
-The target is swappable to a self-hosted MCP server or to Dynatrace Managed. See
+The target is swappable to Dynatrace Managed. See
 [providers/](./providers/) for copy-paste config.
 
 ## Quickstart (SaaS)
@@ -34,16 +33,15 @@ python3 ~/runbooks/dynatrace_report.py # problems, vulnerabilities, hosts
 ```
 
 `env | grep DT_PLATFORM_TOKEN` inside the sandbox shows an `sbx-cs-…` placeholder,
-never your real `dt0s16.` token. Full walkthrough and the `local` / `managed`
-targets are below.
+never your real `dt0s16.` token. Full walkthrough and the `managed`
+target are below.
 
 ## What the kit does
 
 Layered onto an agent, the mixin does four observable things:
 
 1. Wires up the Dynatrace MCP server for the chosen target - the **hosted Remote
-   MCP** (default, no install), a **self-hosted** stdio server
-   (`@dynatrace-oss/dynatrace-mcp-server`), or the **Managed** server
+   MCP** (default, no install) or the **Managed** server
    (`@dynatrace-oss/dynatrace-managed-mcp-server`).
 2. Installs the `requests` library and ships runbooks under `~/runbooks/` that
    query Dynatrace directly (DQL against Grail for SaaS; Environment API v2 for
@@ -68,7 +66,7 @@ sbx login
 
 ### 1. Create a Dynatrace token
 
-- **SaaS** (`remote` / `local` targets): a **platform token** (`dt0s16....`) under
+- **SaaS** (`remote` target): a **platform token** (`dt0s16....`) under
   *Account Management -> Identity & access management -> Platform tokens*.
 - **Managed** target: a classic **API token** in *Settings -> Integration ->
   Dynatrace API*.
@@ -85,7 +83,7 @@ placeholder for the real token on outbound requests, so it never enters the
 sandbox. Secrets are global by default:
 
 ```console
-# SaaS (remote / local) - platform token, keyed on the apps host
+# SaaS (remote) - platform token, keyed on the apps host
 sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
 
 # Managed - API token, keyed on your cluster host (matches kits/managed/spec.yaml)
@@ -119,9 +117,6 @@ the kit can't know for you: edit it in a local clone or `export` it in-sandbox
 # Dynatrace SaaS via the hosted Remote MCP (default, recommended) - :latest == :remote
 sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:latest claude
 
-# Dynatrace SaaS via a self-hosted MCP server in the sandbox
-sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:local claude
-
 # Dynatrace Managed (self-hosted cluster) - edit kits/managed/spec.yaml first
 sbx run --kit ./kits/managed claude
 ```
@@ -142,7 +137,7 @@ sbx run --kit ./sbx-kits-dynatrace/ claude
 #### Choosing the agent
 
 The trailing argument (`claude` above) is the **coding agent** that runs inside
-the sandbox - a separate axis from the target tag. The tag (`:remote`, `:local`,
+the sandbox - a separate axis from the target tag. The tag (`:remote`,
 `:managed`) decides which Dynatrace the tooling points at; the agent decides
 which assistant you interact with. `sbx run --help` lists them:
 
@@ -170,7 +165,7 @@ inside.
 !claude mcp list
 ```
 
-Expect a `dynatrace` entry. For the `local`/`managed` targets the binary is also
+Expect a `dynatrace` entry. For the `managed` target the binary is also
 on PATH: `!command -v mcp-server-dynatrace`.
 
 **4b. The mixin's env is present** (a fingerprint that the kit wired things up):
@@ -232,7 +227,6 @@ automatically, no `spec.yaml` change.
 | Target | MCP server | Dynatrace | Credential | Doc |
 |---|---|---|---|---|
 | remote (default) | Hosted by Dynatrace | SaaS `*.apps.dynatrace.com` | platform token | [providers/remote.md](./providers/remote.md) |
-| local | Self-hosted in sandbox | SaaS `*.apps.dynatrace.com` | platform token | [providers/local.md](./providers/local.md) |
 | managed | Self-hosted (Managed build) | Dynatrace Managed cluster | API token | [providers/managed.md](./providers/managed.md) |
 
 Each page has the exact `spec.yaml`, run command, and setup notes. Overview:

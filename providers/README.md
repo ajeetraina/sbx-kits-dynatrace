@@ -1,28 +1,27 @@
 # Dynatrace targets for the kit
 
 The kit gives your agent hands-on access to Dynatrace - problems, security
-vulnerabilities, entities, logs, and DQL queries against Grail - through the
-official [Dynatrace MCP server](https://github.com/dynatrace-oss/dynatrace-mcp),
-plus a few `requests`-based runbooks for scripting. What changes per target is
-*which Dynatrace* it points at and *how the MCP server is hosted*.
+vulnerabilities, entities, logs, and DQL queries against Grail - through a
+Dynatrace MCP server, plus a few `requests`-based runbooks for scripting. The
+default target uses Dynatrace's hosted **Remote MCP server**; what changes per
+target is *which Dynatrace* it points at and *how the MCP server is hosted*.
 
 ## Target matrix
 
 | Target | MCP server | Dynatrace | Credential | How it reaches Dynatrace |
 |---|---|---|---|---|
 | [remote](./remote.md) (default) | **Hosted** by Dynatrace (no install) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set-custom` | proxy injects `Authorization: Bearer` on the wire |
-| [local](./local.md) | Self-hosted in the sandbox (`@dynatrace-oss/dynatrace-mcp-server`) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set-custom` | proxy injects `Authorization: Bearer` on the wire |
 | [managed](./managed.md) | Self-hosted (`@dynatrace-oss/dynatrace-managed-mcp-server`) | Dynatrace **Managed** (your cluster) | API token via `sbx secret set-custom` | proxy injects `Authorization: Api-Token` on the wire |
 
 ## Why `remote` is the default
 
 Dynatrace's guidance for local-dev clients (VS Code, Claude Code, Cursor, ...) is
 to use the hosted **Remote MCP server**: nothing is installed in the sandbox, it
-is always up to date, and it needs no infrastructure. The self-hosted local
-server still works and ships as the `local` kit, but it is in maintenance mode
-upstream. Both target Dynatrace **SaaS** (the Gen3 `*.apps.dynatrace.com`
-platform with Grail/DQL). Dynatrace **Managed** (self-hosted clusters) has a
-different API and its own MCP server - that is the `managed` kit.
+is always up to date, and it needs no infrastructure. It is Dynatrace's
+production-supported server and targets Dynatrace **SaaS** (the Gen3
+`*.apps.dynatrace.com` platform with Grail/DQL). Dynatrace **Managed**
+(self-hosted clusters) has a different API and its own MCP server - that is the
+`managed` kit.
 
 ## Notes that apply to every target
 
@@ -34,7 +33,7 @@ different API and its own MCP server - that is the `managed` kit.
    Secrets are global by default (scope one with `--sandbox`).
 
    ```bash
-   # SaaS (remote / local)
+   # SaaS (remote)
    sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
    # Managed (host must match kits/managed/spec.yaml)
    sbx secret set-custom --host 'managed.example.com' --env DT_API_TOKEN --value "$DT_TOKEN"
@@ -54,7 +53,7 @@ different API and its own MCP server - that is the `managed` kit.
    the kit's egress once so sandbox requests aren't denied:
 
    ```bash
-   # SaaS (remote / local)
+   # SaaS (remote)
    sbx policy allow network "*.apps.dynatrace.com,pypi.org,files.pythonhosted.org"
    # Managed (swap in your cluster host; npm is needed for the self-hosted MCP)
    sbx policy allow network "managed.example.com,registry.npmjs.org,pypi.org,files.pythonhosted.org"
@@ -65,7 +64,7 @@ different API and its own MCP server - that is the `managed` kit.
 
 ## Tokens & scopes
 
-- **SaaS (`remote`, `local`)** use a **platform token** (`dt0s16....`), created
+- **SaaS (`remote`)** uses a **platform token** (`dt0s16....`), created
   under *Account Management -> Identity & access management -> Platform tokens*.
   A read-only observability set: `app-engine:apps:run`, `storage:buckets:read`,
   `storage:logs:read`, `storage:metrics:read`, `storage:events:read`,

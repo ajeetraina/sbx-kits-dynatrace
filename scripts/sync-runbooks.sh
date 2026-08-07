@@ -13,7 +13,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 src="$repo_root/files"
-targets=(remote local managed)
+targets=(remote managed)
 
 check_only=false
 [ "${1:-}" = "--check" ] && check_only=true

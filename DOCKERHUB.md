@@ -3,9 +3,9 @@
 A standalone [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
 (`kind: mixin`) that gives any sandbox agent access to
 [Dynatrace](https://www.dynatrace.com/) - problems, security vulnerabilities,
-entities, logs, and DQL queries against Grail - through the official
-[Dynatrace MCP server](https://github.com/dynatrace-oss/dynatrace-mcp), plus
-`requests`-based runbooks. This image ships in three target flavors, one per tag.
+entities, logs, and DQL queries against Grail - through Dynatrace's hosted
+**Remote MCP server**, plus `requests`-based runbooks. This image ships in two
+target flavors, one per tag.
 
 Source and full docs: https://github.com/ajeetraina/sbx-kits-dynatrace
 
@@ -14,14 +14,12 @@ Source and full docs: https://github.com/ajeetraina/sbx-kits-dynatrace
 | Tag | MCP server | Dynatrace | Credential |
 |-----|------------|-----------|------------|
 | `latest`, `remote` | Hosted by Dynatrace (Remote MCP) | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set-custom` |
-| `local` | Self-hosted in the sandbox | SaaS (`*.apps.dynatrace.com`) | platform token via `sbx secret set-custom` |
 | `managed` | Self-hosted (Managed build) | Dynatrace Managed cluster | API token via `sbx secret set-custom` |
 
 `remote` is the default because it needs no install and is Dynatrace's
 recommended path for local-dev clients: the MCP server is hosted, and the
 sandbox reaches it over `*.apps.dynatrace.com` with the token injected on the
-wire. `local` runs a self-hosted MCP server in the sandbox instead; `managed`
-targets a self-hosted Dynatrace Managed cluster.
+wire. `managed` targets a self-hosted Dynatrace Managed cluster instead.
 
 ## Quick start
 
@@ -30,11 +28,6 @@ environment URL (see the repo's providers/remote.md), then launch:
 
     sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
     sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:latest claude
-
-Self-hosted SaaS MCP:
-
-    sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value "$DT_TOKEN"
-    sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:local claude
 
 Dynatrace Managed (edit kits/managed/spec.yaml with your cluster host first):
 
