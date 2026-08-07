@@ -21,10 +21,6 @@ recommended path for local-dev clients: the MCP server is hosted, and the
 sandbox reaches it over `*.apps.dynatrace.com` with the token injected on the
 wire. `managed` targets a self-hosted Dynatrace Managed cluster instead.
 
-> A `local` tag (a self-hosted `@dynatrace-oss/dynatrace-mcp-server` in the
-> sandbox) was retired: that upstream server is deprecated (`2.1.2` was the
-> final release). Use `remote`/`latest`.
-
 ## Quick start
 
 Remote default. Store a platform token once (keyed on the apps host), set your

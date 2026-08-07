@@ -18,9 +18,7 @@ target is *which Dynatrace* it points at and *how the MCP server is hosted*.
 Dynatrace's guidance for local-dev clients (VS Code, Claude Code, Cursor, ...) is
 to use the hosted **Remote MCP server**: nothing is installed in the sandbox, it
 is always up to date, and it needs no infrastructure. It is Dynatrace's
-production-supported server and the successor to the deprecated self-hosted
-server (`@dynatrace-oss/dynatrace-mcp-server`, final release `2.1.2`; a `local`
-kit for it was retired). It targets Dynatrace **SaaS** (the Gen3
+production-supported server and targets Dynatrace **SaaS** (the Gen3
 `*.apps.dynatrace.com` platform with Grail/DQL). Dynatrace **Managed**
 (self-hosted clusters) has a different API and its own MCP server - that is the
 `managed` kit.

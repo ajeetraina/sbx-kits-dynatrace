@@ -7,10 +7,8 @@ platform token is injected by the sbx proxy as a `Bearer` header on the wire, so
 it never enters the sandbox.
 
 > This is Dynatrace's **production-supported** MCP server (see the
-> [Dynatrace Hub listing](https://www.dynatrace.com/hub/detail/dynatrace-mcp-server)),
-> and the successor to the now-deprecated self-hosted server
-> ([github.com/dynatrace-oss/dynatrace-mcp](https://github.com/dynatrace-oss/dynatrace-mcp),
-> final release `2.1.2`). Walkthrough:
+> [Dynatrace Hub listing](https://www.dynatrace.com/hub/detail/dynatrace-mcp-server)).
+> Walkthrough:
 > [Sky-high developer productivity with Dynatrace MCP](https://www.dynatrace.com/news/blog/sky-high-developer-productivity-with-dynatrace-mcp-and-github-copilot/).
 
 | | |
