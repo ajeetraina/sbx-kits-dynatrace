@@ -3,9 +3,8 @@
 A standalone [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
 (`kind: mixin`) that gives any sandbox agent hands-on access to
 [Dynatrace](https://www.dynatrace.com/) - problems, security vulnerabilities,
-entities, logs, and DQL queries against Grail - through the official
-[Dynatrace MCP server](https://github.com/dynatrace-oss/dynatrace-mcp), plus a
-few `requests`-based runbooks for scripting.
+entities, logs, and DQL queries against Grail - through Dynatrace's hosted
+**Remote MCP server**, plus a few `requests`-based runbooks for scripting.
 
 The **hosted Remote MCP server** for Dynatrace SaaS is the zero-install default.
 The target is swappable to a self-hosted MCP server or to Dynatrace Managed. See
@@ -43,8 +42,8 @@ Layered onto an agent, the mixin does four observable things:
 
 1. Wires up the Dynatrace MCP server for the chosen target - the **hosted Remote
    MCP** (default, no install), a **self-hosted** stdio server
-   (`@dynatrace-oss/dynatrace-mcp-server`), or the **Managed** server
-   (`@dynatrace-oss/dynatrace-managed-mcp-server`).
+   (`@dynatrace-oss/dynatrace-mcp-server`, deprecated upstream - final `2.1.2`),
+   or the **Managed** server (`@dynatrace-oss/dynatrace-managed-mcp-server`).
 2. Installs the `requests` library and ships runbooks under `~/runbooks/` that
    query Dynatrace directly (DQL against Grail for SaaS; Environment API v2 for
    Managed).
@@ -119,7 +118,7 @@ the kit can't know for you: edit it in a local clone or `export` it in-sandbox
 # Dynatrace SaaS via the hosted Remote MCP (default, recommended) - :latest == :remote
 sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:latest claude
 
-# Dynatrace SaaS via a self-hosted MCP server in the sandbox
+# Dynatrace SaaS via a self-hosted MCP server in the sandbox (deprecated - prefer :remote)
 sbx run --kit docker.io/ajeetraina777/sbx-dynatrace-kits:local claude
 
 # Dynatrace Managed (self-hosted cluster) - edit kits/managed/spec.yaml first
@@ -232,7 +231,7 @@ automatically, no `spec.yaml` change.
 | Target | MCP server | Dynatrace | Credential | Doc |
 |---|---|---|---|---|
 | remote (default) | Hosted by Dynatrace | SaaS `*.apps.dynatrace.com` | platform token | [providers/remote.md](./providers/remote.md) |
-| local | Self-hosted in sandbox | SaaS `*.apps.dynatrace.com` | platform token | [providers/local.md](./providers/local.md) |
+| local *(deprecated)* | Self-hosted in sandbox (upstream deprecated, final `2.1.2`) | SaaS `*.apps.dynatrace.com` | platform token | [providers/local.md](./providers/local.md) |
 | managed | Self-hosted (Managed build) | Dynatrace Managed cluster | API token | [providers/managed.md](./providers/managed.md) |
 
 Each page has the exact `spec.yaml`, run command, and setup notes. Overview:

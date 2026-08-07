@@ -1,8 +1,8 @@
 schemaVersion: "1"
 kind: mixin
 name: dynatrace
-displayName: Dynatrace (SaaS, self-hosted MCP)
-description: "Installs the self-hosted Dynatrace MCP server (@dynatrace-oss/dynatrace-mcp-server) into the sandbox and wires it to a Dynatrace SaaS environment. The kit holds no token: store it once with `sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value \"$DT_TOKEN\"` and the sbx proxy injects it as a Bearer token on requests to *.apps.dynatrace.com. NOTE: the local server is in maintenance mode - prefer the `remote` kit."
+displayName: Dynatrace (SaaS, self-hosted MCP - DEPRECATED)
+description: "Installs the self-hosted Dynatrace MCP server (@dynatrace-oss/dynatrace-mcp-server) into the sandbox and wires it to a Dynatrace SaaS environment. The kit holds no token: store it once with `sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN --value \"$DT_TOKEN\"` and the sbx proxy injects it as a Bearer token on requests to *.apps.dynatrace.com. DEPRECATED: the upstream server (github.com/dynatrace-oss/dynatrace-mcp) is deprecated - 2.1.2 was the final release and Dynatrace directs users to the hosted Remote MCP server. Use the `remote` kit instead; this kit is kept only for setups that need a self-hosted stdio server on the pinned 2.1.2."
 sourceURL: https://github.com/ajeetraina/sbx-kits-dynatrace
 
 network:
@@ -69,7 +69,12 @@ commands:
           }
         }
 memory: |
-  ## Dynatrace observability tooling (SaaS, self-hosted MCP)
+  ## Dynatrace observability tooling (SaaS, self-hosted MCP - DEPRECATED)
+
+  NOTE: the upstream self-hosted server (`@dynatrace-oss/dynatrace-mcp-server`,
+  github.com/dynatrace-oss/dynatrace-mcp) is deprecated - `2.1.2` was the final
+  release and Dynatrace directs users to the hosted Remote MCP server. Prefer the
+  `remote` kit; this pinned `2.1.2` install is kept only for self-hosted stdio setups.
 
   The Dynatrace MCP server (`@dynatrace-oss/dynatrace-mcp-server`) is installed
   on PATH as `mcp-server-dynatrace` and registered with the agent as
@@ -82,8 +87,8 @@ memory: |
   `sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN`,
   which sets `DT_PLATFORM_TOKEN` to a placeholder the MCP server sends and the
   sbx proxy swaps for the real platform token on outbound requests to
-  `*.apps.dynatrace.com`. The upstream local server is in maintenance mode; the
-  hosted Remote MCP (`remote` kit) is the recommended path.
+  `*.apps.dynatrace.com`. The upstream local server is deprecated (final release
+  `2.1.2`); the hosted Remote MCP (`remote` kit) is the recommended path.
 
   For quick scripting the `requests`-based runbooks in `~/runbooks/` run DQL
   directly against the Grail query API - e.g.

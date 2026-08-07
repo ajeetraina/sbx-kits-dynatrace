@@ -1,13 +1,18 @@
-# Local MCP (Dynatrace SaaS, self-hosted server)
+# Local MCP (Dynatrace SaaS, self-hosted server) — DEPRECATED
 
 Installs the Dynatrace MCP server (`@dynatrace-oss/dynatrace-mcp-server`) inside
 the sandbox and wires it to your SaaS environment. Same SaaS target and same
 credential model as [remote](./remote.md) - the only difference is that the MCP
 server runs *in the sandbox* instead of being hosted by Dynatrace.
 
-> The upstream local server is in **maintenance mode** (final release `2.1.2`);
-> Dynatrace recommends the hosted [remote](./remote.md) server for local-dev
-> clients. This kit exists for setups that want a self-hosted stdio server.
+> ⚠️ **Deprecated.** The upstream self-hosted server
+> ([github.com/dynatrace-oss/dynatrace-mcp](https://github.com/dynatrace-oss/dynatrace-mcp))
+> is deprecated: `2.1.2` was the **final release** and no further updates will be
+> made. Dynatrace directs users to the hosted **Remote MCP server** (the
+> [remote](./remote.md) kit, the default here). Use `remote` unless you
+> specifically need a self-hosted stdio server pinned to `2.1.2`; this kit is
+> kept only for that case. See Dynatrace's
+> [migration guide](https://github.com/dynatrace-oss/dynatrace-mcp/blob/main/docs/remote-mcp-migration.md).
 
 | | |
 |---|---|
