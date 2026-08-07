@@ -6,6 +6,12 @@ environment. Nothing is installed in the sandbox: the MCP server is a URL under
 platform token is injected by the sbx proxy as a `Bearer` header on the wire, so
 it never enters the sandbox.
 
+> This is Dynatrace's **production-supported** MCP server (see the
+> [Dynatrace Hub listing](https://www.dynatrace.com/hub/detail/dynatrace-mcp-server)),
+> and the successor to the now-deprecated self-hosted server used by the
+> [local](./local.md) kit. Walkthrough:
+> [Sky-high developer productivity with Dynatrace MCP](https://www.dynatrace.com/news/blog/sky-high-developer-productivity-with-dynatrace-mcp-and-github-copilot/).
+
 | | |
 |---|---|
 | MCP server | Hosted by Dynatrace (Streamable HTTP) |

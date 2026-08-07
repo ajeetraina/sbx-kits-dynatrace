@@ -8,8 +8,9 @@ server runs *in the sandbox* instead of being hosted by Dynatrace.
 > ⚠️ **Deprecated.** The upstream self-hosted server
 > ([github.com/dynatrace-oss/dynatrace-mcp](https://github.com/dynatrace-oss/dynatrace-mcp))
 > is deprecated: `2.1.2` was the **final release** and no further updates will be
-> made. Dynatrace directs users to the hosted **Remote MCP server** (the
-> [remote](./remote.md) kit, the default here). Use `remote` unless you
+> made. Dynatrace directs users to the hosted, **production-supported**
+> [Remote MCP server](https://www.dynatrace.com/hub/detail/dynatrace-mcp-server)
+> (the [remote](./remote.md) kit, the default here). Use `remote` unless you
 > specifically need a self-hosted stdio server pinned to `2.1.2`; this kit is
 > kept only for that case. See Dynatrace's
 > [migration guide](https://github.com/dynatrace-oss/dynatrace-mcp/blob/main/docs/remote-mcp-migration.md).
