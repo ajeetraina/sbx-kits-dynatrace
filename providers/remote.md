@@ -27,6 +27,17 @@ calls 403); add the read-only observability scopes on top so the tools can reach
 data (see [providers/README.md](./README.md#tokens--scopes)). Copy the
 `dt0s16....` value.
 
+> **The `mcp-gateway:*` permission must be granted to the user/group too, not
+> just the token.** A platform token's effective permissions are the
+> *intersection* of its scopes and the identity's IAM permissions, so a token
+> that lists `mcp-gateway:servers:invoke` still returns
+> `403 missingScopes:["mcp-gateway:servers:invoke"]` if the account behind it
+> lacks that permission. Grant it once under *Account Management -> Identity &
+> access management -> Policies* with a statement like
+> `ALLOW mcp-gateway:servers:invoke, mcp-gateway:servers:read;` bound to your
+> group. The `storage:*:read` DQL path can work while this is still missing, so
+> the MCP tools 403-ing while the runbooks succeed is the tell-tale sign.
+
 ## 2. Store the token as a secret (never baked into the kit)
 
 Dynatrace isn't a built-in sbx service, so use `set-custom`, keyed on the SaaS
