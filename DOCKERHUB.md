@@ -3,9 +3,9 @@
 A standalone [Docker Sandboxes](https://docs.docker.com/ai/sandboxes/) kit
 (`kind: mixin`) that gives any sandbox agent access to
 [Dynatrace](https://www.dynatrace.com/) - problems, security vulnerabilities,
-entities, logs, and DQL queries against Grail - through Dynatrace's hosted
-**Remote MCP server**, plus `requests`-based runbooks. This image ships in two
-target flavors, one per tag.
+entities, logs, and DQL queries against Grail - through a Dynatrace MCP server,
+plus `requests`-based runbooks. This image ships in two target flavors, one per
+tag.
 
 Source and full docs: https://github.com/ajeetraina/sbx-kits-dynatrace
 
