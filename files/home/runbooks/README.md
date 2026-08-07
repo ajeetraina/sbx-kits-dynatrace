@@ -1,8 +1,8 @@
 # Runbooks
 
 Runnable demos shipped with the Dynatrace kit. They live at `~/runbooks/` in the
-sandbox and read `DT_ENVIRONMENT` / `DT_PLATFORM_TOKEN` (SaaS) or
-`DT_ENVIRONMENT_CONFIGS` (Managed) from the environment the kit sets up. The
+sandbox and read `DT_ENVIRONMENT` / `DT_PLATFORM_TOKEN` from the environment the
+kit sets up. The
 credential in the sandbox is always a placeholder (stored on the host with
 `sbx secret set-custom`) - the sbx proxy overwrites the auth header with the
 real token on the wire - so the scripts just send it and let the proxy do the
@@ -10,8 +10,6 @@ rest.
 
 They use only the `requests` library the kit installs, plus the small shared
 `dtapi.py` helper.
-
-## SaaS target (`remote`)
 
 ### run_dql.py
 
@@ -33,17 +31,6 @@ read is skipped rather than aborting the rest.
 
 ```console
 python3 ~/runbooks/dynatrace_report.py
-```
-
-## Managed target (`managed`)
-
-### managed_report.py
-
-Prints open problems from a self-hosted Dynatrace Managed cluster via the
-Managed Environment API v2, reading the connection from `DT_ENVIRONMENT_CONFIGS`.
-
-```console
-python3 ~/runbooks/managed_report.py
 ```
 
 ---
