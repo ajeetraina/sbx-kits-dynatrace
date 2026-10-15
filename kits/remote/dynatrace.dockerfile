@@ -26,14 +26,18 @@ COPY files/home/runbooks/ /out/home/agent/runbooks/
 RUN rm -rf /out/home/agent/runbooks/__pycache__ \
  && chown -R 1000:1000 /out/home/agent
 
-# The overlay: lands on any shell base.
+# The overlay: lands on any shell base. It carries files only — no ENV.
 FROM scratch
 COPY --from=build /out /
 
-# Static runtime env. A mixin's ENV merges into the composed image, so these
-# reach the agent process and the runbooks (an /etc/profile.d drop would reach
-# only login shells). NO_PROXY keeps loopback traffic off the sandbox proxy.
-# DT_ENVIRONMENT is not set here: it resolves at create from the `environment`
-# kit arg (see the descriptor) so one published kit serves every environment.
-ENV NO_PROXY="localhost,127.0.0.1,host.docker.internal" \
-    no_proxy="localhost,127.0.0.1,host.docker.internal"
+# MIGRATION NOTE: the v2 kit set NO_PROXY / no_proxy in environment.variables.
+# They are intentionally NOT set here. A mixin's ENV merges into the composed
+# image, and a merged key other than PATH is first-writer-owned: the sbx
+# runtime already sets NO_PROXY (to its own loopback + sandbox CIDR), so a
+# mixin that sets a different value makes the composition refuse to assemble
+# ("env conflict on NO_PROXY"). The runtime's value is the correct one, so the
+# mixin leaves it alone.
+#
+# DT_ENVIRONMENT is likewise not set here: it resolves at create from the
+# `environment` kit arg (see the descriptor) so one published kit serves every
+# environment.
