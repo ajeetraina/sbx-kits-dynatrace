@@ -9,6 +9,59 @@ entities, logs, and DQL queries against Grail - through Dynatrace's hosted
 The **hosted Remote MCP server** for Dynatrace SaaS is the zero-install path this
 kit wires up. See [providers/](./providers/) for copy-paste config.
 
+## Kit schema versions: v2 and v3
+
+This repo ships the kit in **both** Docker Sandboxes kit schema versions, so it
+works with older and current `sbx` releases alike. The two descriptors live
+side by side in the same kit directory (repo root and [`kits/remote/`](./kits/remote/)):
+
+| | v2 (schema `"1"`) | v3 (schema `"3"`) |
+|---|---|---|
+| Descriptor | `spec.yaml` | `dynatrace.yaml` |
+| Recipe / content | `files/home/` convention | `dynatrace.dockerfile` (overlay) |
+| Agent guidance | `memory:` block in `spec.yaml` | `dynatrace-context.md` |
+| Bind the token | `sbx secret set-custom --host '*.apps.dynatrace.com' --env DT_PLATFORM_TOKEN` | `sbx secret set dynatrace` |
+| Set the environment | edit the clone / `export DT_ENVIRONMENT=…` | `--kit-arg environment=https://<env>.apps.dynatrace.com` |
+
+Both describe the same `kind: mixin` kit — the same Remote MCP wiring, the same
+`*.apps.dynatrace.com` Bearer injection, the same `requests` runbooks. Pick the
+path that matches your tooling.
+
+### Run the v2 kit (default today)
+
+`sbx run --kit` reads `spec.yaml` when it is present, so the existing commands in
+this README (and the [Quickstart](#quickstart)) drive the v2 kit as-is:
+
+```console
+sbx run --kit ./kits/remote claude
+```
+
+### Build & run the v3 kit
+
+The v3 descriptor is built by `docker buildx` (the `# syntax=docker/sandbox-kit:3`
+frontend validates and builds it) and run by `sbx` as a source kit or a
+published image. Because `sbx run --kit <dir>` prefers a `spec.yaml` when both
+files are in the directory, run the v3 kit from a directory that holds only the
+v3 descriptor, or publish it and run it by reference.
+
+```console
+# Validate + build the v3 kit locally (OCI layout), then conformance-check it
+docker buildx build . -f dynatrace.yaml -t dynatrace-kit:1.0.0 \
+  --output type=oci,dest=/tmp/dynatrace-layout,tar=false
+kit-tck validate --layout /tmp/dynatrace-layout 1.0.0
+
+# Bind the token as the `dynatrace` service credential (not set-custom)
+sbx secret set dynatrace
+
+# Compose the v3 mixin onto any workload, passing the environment as a kit arg
+sbx run shell --kit ./path/to/v3-only-dir \
+  --kit-arg environment=https://<env>.apps.dynatrace.com
+```
+
+The v3 kit exports `DT_ENVIRONMENT` from the `environment` arg, surfaces the
+token in-container as the `proxy-managed` sentinel in `DT_PLATFORM_TOKEN`, and
+writes `~/.dynatrace/mcp.json` with the environment URL already filled in.
+
 ## Quickstart
 
 ```bash
