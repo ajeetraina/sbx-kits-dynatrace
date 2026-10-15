@@ -1,0 +1,161 @@
+# syntax=docker/sandbox-kit:3
+
+# Dynatrace (SaaS, Remote MCP) as a MIXIN. Wires any agent to a Dynatrace SaaS
+# environment through the official hosted Dynatrace Remote MCP server — no MCP
+# server is installed in the sandbox. Layer it onto a shell/agent workload; the
+# base workload's launch command stays, and the agent talks to the `dynatrace`
+# MCP server (or you run the DQL runbooks from a shell). The kit holds no token:
+# bind it once on the host with `sbx secret set dynatrace`, and the sbx proxy
+# injects it as a Bearer credential on requests to *.apps.dynatrace.com.
+schemaVersion: "3"
+kind: mixin
+
+displayName: Dynatrace (SaaS, Remote MCP)
+author: "Ajeet Singh Raina"
+description: >-
+  Wires an agent to a Dynatrace SaaS environment through the official hosted
+  Dynatrace Remote MCP server (no install) — query problems, vulnerabilities,
+  entities, logs and run DQL against Grail. The kit holds no token: bind it once
+  with `sbx secret set dynatrace` and the sbx proxy injects it as a Bearer token
+  on requests to *.apps.dynatrace.com.
+sourceUrl: https://github.com/ajeetraina/sbx-kits-dynatrace
+version: "1.0.0"
+licenses:
+  - Apache-2.0
+
+args:
+  # Your Dynatrace SaaS platform URL — the one value the kit cannot know for
+  # you. It resolves at CREATE (not build) and is exported into the sandbox as
+  # DT_ENVIRONMENT, so one published kit serves every environment:
+  # `sbx run ... --kit-arg environment=https://<env>.apps.dynatrace.com`. Left
+  # at the placeholder, the Remote MCP registration below no-ops (it is still a
+  # valid build), and you can `export DT_ENVIRONMENT=...` in-sandbox instead.
+  environment:
+    default: "https://YOUR-ENV.apps.dynatrace.com"
+    pattern: '^https://[A-Za-z0-9.-]+\.apps\.dynatrace\.com/?$'
+    description: >-
+      Dynatrace SaaS platform URL — the Gen3 "apps" URL, e.g.
+      https://abc12345.apps.dynatrace.com (NOT the classic
+      *.live.dynatrace.com). Exported into the sandbox as DT_ENVIRONMENT.
+    env: DT_ENVIRONMENT
+
+capabilities:
+  # --- Network policy -------------------------------------------------------
+  # v2 had one flat allow list; v3 splits it by who reaches the host. pip (for
+  # the runbooks' requests lib) runs in the install phase; the agent's MCP calls
+  # and the runbooks' DQL calls run in the runtime phase. The union loses no
+  # host from the v2 list.
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      install:
+        allow:
+          - pypi.org                 # requests wheel + deps, used by the runbooks
+          - files.pythonhosted.org
+      runtime:
+        allow:
+          # Dynatrace SaaS platform. All Gen3 SaaS traffic — the Remote MCP
+          # gateway and the Grail DQL query API — lives under
+          # *.apps.dynatrace.com. This is also the credential inject domain
+          # below, so it must appear here verbatim.
+          - "*.apps.dynatrace.com"
+
+  # --- Credential -----------------------------------------------------------
+  # The platform token, presented as a Bearer credential on every request to
+  # the SaaS platform. Bound on the host with `sbx secret set dynatrace`; it
+  # never lands in the image or the sandbox. Required (the default): without a
+  # binding the sandbox fails at create rather than letting the agent discover
+  # it as a 401 mid-task.
+  - type: com.docker.sandbox/credential@1
+    description: Dynatrace platform token (Bearer) for the Remote MCP gateway and the Grail DQL API
+    config:
+      service: dynatrace
+      phase: runtime
+      apiKey:
+        # DT_PLATFORM_TOKEN carries a proxy-managed sentinel in-container: the
+        # runbooks (dtapi.py) read it and send `Authorization: Bearer
+        # <sentinel>`, and the inject rule below overwrites that header with the
+        # real token on the wire to *.apps.dynatrace.com. The agent's own Remote
+        # MCP registration (the lifecycle file and startup hook) sends the same
+        # kind of placeholder and is rewritten the same way.
+        name: DT_PLATFORM_TOKEN
+        proxyManaged: true
+        inject:
+          - {domain: "*.apps.dynatrace.com", header: Authorization, format: "Bearer %s"}
+
+  # --- Lifecycle ------------------------------------------------------------
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        # Install `requests` for the DQL runbooks. Kept a create-time hook
+        # rather than baked into the overlay: a --user install lands in ~/.local
+        # tied to a specific Python minor version, so it has to run against the
+        # composed base's own interpreter. Best-effort — the Remote MCP server
+        # (the main feature) works without it, so a base lacking python is a
+        # warning, not a failed create.
+        - command: |
+            set -eu
+            command -v python3 >/dev/null 2>&1 || {
+              echo "dynatrace kit: python3 not found; skipping the requests install. The Remote MCP server still works; the DQL runbooks will not. Install python3 + python3-pip on the base to enable them." >&2
+              exit 0
+            }
+            python3 -m pip --version >/dev/null 2>&1 || {
+              echo "dynatrace kit: python3 has no pip module; skipping the requests install. Install python3-pip on the base to enable the DQL runbooks." >&2
+              exit 0
+            }
+            # PEP 668 marks the system Python externally managed, so a --user
+            # install needs --break-system-packages; retry without it for pip
+            # versions that predate the flag.
+            install_requests() {
+              python3 -m pip install --user --no-cache-dir --disable-pip-version-check "$@" 'requests>=2.31,<3'
+            }
+            install_requests --break-system-packages || install_requests
+          user: "1000"
+          # pip fetches through the sandbox's forced proxy, so the hook's
+          # deny-by-default environment must carry the proxy variables.
+          env: [HTTP_PROXY, HTTPS_PROXY, NO_PROXY, http_proxy, https_proxy, no_proxy]
+          description: Install the requests library used by the DQL runbooks (best-effort)
+      startup:
+        # Best-effort: register the hosted Remote MCP server with the Claude
+        # agent if one is present. The Authorization value is a placeholder the
+        # proxy overwrites on the wire with the real token for
+        # *.apps.dynatrace.com. Skipped while DT_ENVIRONMENT is still the
+        # placeholder; `|| true` keeps it a no-op for other agents and keeps a
+        # re-add (claude mcp add is not idempotent) from failing the boot.
+        - command: |
+            command -v claude >/dev/null 2>&1 || exit 0
+            case "$DT_ENVIRONMENT" in *YOUR-ENV*) exit 0 ;; esac
+            claude mcp add --transport http dynatrace \
+              "$DT_ENVIRONMENT/platform-reserved/mcp-gateway/v0.1/servers/dynatrace-mcp/mcp" \
+              --header "Authorization: Bearer inject-me" >/dev/null 2>&1 || true
+          user: "1000"
+          env: [DT_ENVIRONMENT]
+          description: Register the Dynatrace Remote MCP server with the Claude agent (best-effort; no-op elsewhere)
+      files:
+        # Portable Remote MCP definition — import into any agent that reads an
+        # mcpServers block. The URL carries the real `environment` arg (file
+        # contents expand ${{ kit.args.* }} at create); the Authorization value
+        # is a placeholder the proxy overwrites on the wire. overwrite: false so
+        # a copy the user has edited survives a recreate.
+        - path: /home/agent/.dynatrace/mcp.json
+          mode: "0644"
+          overwrite: false
+          description: Portable Remote MCP definition for agents that read an mcpServers block
+          content: |
+            {
+              "mcpServers": {
+                "dynatrace": {
+                  "type": "http",
+                  "url": "${{ kit.args.environment }}/platform-reserved/mcp-gateway/v0.1/servers/dynatrace-mcp/mcp",
+                  "headers": {
+                    "Authorization": "Bearer inject-me"
+                  }
+                }
+              }
+            }
+
+  # --- Agent context --------------------------------------------------------
+  # Contributes instructions; owns no profile (mixins carry contentFile alone,
+  # no filename). The body is staged into the image at publish.
+  - type: com.docker.sandbox/agent-context@1
+    config:
+      contentFile: ./dynatrace-context.md

@@ -1,0 +1,13 @@
+# The v3 recipe only COPYs files/home/runbooks; everything else is context
+# bloat or should never ship. Python bytecode caches carry foreign ownership
+# and are regenerated at runtime.
+.git
+.github
+.sbx
+**/__pycache__/
+**/*.py[cod]
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+.DS_Store
